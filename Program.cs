@@ -9,24 +9,26 @@
 
     internal class Program
     {
-        static readonly string WorkingDir = @"C:\Users\Fred\Documents\Git\s3unlocked\Levels\LBZ\Chunks";
-        static readonly string FileLayoutAct1 = @"..\Layout\1.bin";
-        static readonly string FileLayoutAct2 = @"..\Layout\2.bin";
-        static readonly string FileSolidsAct1 = @"..\Collision\1.bin";
-        static readonly string FileSolidsAct2 = @"..\Collision\2.bin";
+        private static readonly string WorkingDir = @"D:\s3unlocked\Levels\LBZ\Chunks";
+        private static readonly string FileLayoutAct1 = @"..\Layout\1.bin";
+        private static readonly string FileLayoutAct2 = @"..\Layout\2.bin";
+        private static readonly string FileSolidsAct1 = @"..\Collision\1.bin";
+        private static readonly string FileSolidsAct2 = @"..\Collision\2.bin";
 
-        static readonly string FileChunksAct1 = "Act 1";
-        static readonly string FileChunksAct2 = "Act 2";
-        static readonly string FileChunksReport = @"chunks.txt";
-        static readonly string FileBlocksCommon = @"..\Blocks\Primary";
-        static readonly string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
-        static readonly string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
-        static readonly string FileBlocksReport = @"blocks.txt";
-        static readonly string FileTilesCommon = @"..\Tiles\Primary";
-        static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
-        static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
+        private static readonly string FileChunksAct1 = "Act 1";
+        private static readonly string FileChunksAct2 = "Act 2";
+        private static readonly string FileChunksReport = @"chunks.txt";
+        private static readonly string FileBlocksCommon = @"..\Blocks\Primary";
+        private static readonly string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
+        private static readonly string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
+        private static readonly string FileBlocksReport = @"blocks.txt";
+        private static readonly string FileTilesCommon = @"..\Tiles\Primary";
+        private static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
+        private static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
 
-        static void Main()
+        private static readonly JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
+
+        private static void Main()
         {
             var layoutAct1 = ReadLayout(FileLayoutAct1);
             var layoutAct2 = ReadLayout(FileLayoutAct2);
@@ -75,14 +77,14 @@
             }
         }
 
-        static void MarkUsedChunks(IList<ChunkInfo> chunks, LayoutInfo layout)
+        private static void MarkUsedChunks(List<ChunkInfo> chunks, LayoutInfo layout)
         {
             foreach (var row in layout.Rows)
                 foreach (var chunk in row.Chunks)
                     chunks[chunk].Used = true;
         }
 
-        static void MarkDuplicateChunks(IList<ChunkInfo> chunks)
+        private static void MarkDuplicateChunks(List<ChunkInfo> chunks)
         {
             for (var index1 = 0; index1 < chunks.Count; index1++)
             {
@@ -113,16 +115,16 @@
             }
         }
 
-        static void BlankUnusedChunks(IList<ChunkInfo> chunks)
+        private static void BlankUnusedChunks(List<ChunkInfo> chunks)
         {
             var blankDefinition = chunks[0].Definition;
             foreach (var chunk in chunks.Where(chunk => !chunk.Used))
                 chunk.Definition = blankDefinition;
         }
 
-        static IList<BlockMapping?>? AnalyzeChunks(IList<ChunkInfo> chunksAct1, IList<ChunkInfo> chunksAct2, int blocksCommonCount)
+        private static List<BlockMapping?>? AnalyzeChunks(List<ChunkInfo> chunksAct1, List<ChunkInfo> chunksAct2, int blocksCommonCount)
         {
-            var chunkIgnore = new Dictionary<int, IList<int>?>();
+            var chunkIgnore = new Dictionary<int, List<int>?>();
             var chunkConfirm = new List<(int, int)>();
             var path = Path.Combine(WorkingDir, FileChunksReport);
 
@@ -245,7 +247,7 @@
                 var report = new ChunkReport(chunksAct1, chunksAct2, chunkIgnore);
 
                 using var file = File.CreateText(path);
-                file.Write(JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
+                file.Write(JsonSerializer.Serialize(report, jsonOptions));
 
                 return null;
             }
@@ -253,7 +255,7 @@
             return blockMappings;
         }
 
-        static IList<BlockConfirmMatch>? AnalyzeBlocks(IList<BlockMapping?> blockMappings)
+        private static List<BlockConfirmMatch>? AnalyzeBlocks(List<BlockMapping?> blockMappings)
         {
             var blockConfirm = new List<BlockConfirmMatch>();
 
@@ -286,7 +288,7 @@
                 var report = new BlockReport(blockConfirm);
 
                 using var file = File.CreateText(path);
-                file.Write(JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
+                file.Write(JsonSerializer.Serialize(report, jsonOptions));
 
                 return null;
             }
@@ -294,7 +296,7 @@
             return blockConfirm;
         }
 
-        static bool AnalyzeTiles(IList<BlockConfirmMatch> blockConfirm, IList<BlockInfo> blocksAct1, IList<BlockInfo> blocksAct2, IList<IList<byte>> tilesAct1, IList<IList<byte>> tilesAct2)
+        private static bool AnalyzeTiles(List<BlockConfirmMatch> blockConfirm, List<BlockInfo> blocksAct1, List<BlockInfo> blocksAct2, List<IList<byte>> tilesAct1, List<IList<byte>> tilesAct2)
         {
             foreach (var match in blockConfirm)
             {
@@ -338,14 +340,14 @@
             return true;
         }
 
-        static bool CompareTiles(TileRef tileAct1, TileRef tileAct2, IList<IList<byte>> tilesAct1, IList<IList<byte>> tilesAct2, bool xFlip, bool yFlip)
+        private static bool CompareTiles(TileRef tileAct1, TileRef tileAct2, List<IList<byte>> tilesAct1, List<IList<byte>> tilesAct2, bool xFlip, bool yFlip)
         {
             var effectiveXFlip = xFlip ^ tileAct1.XFlip ^ tileAct2.XFlip;
             var effectiveYFlip = yFlip ^ tileAct1.YFlip ^ tileAct2.YFlip;
             IList<int> lookup;
 
-            if (!effectiveXFlip && !effectiveYFlip) lookup = new[]
-            {
+            if (!effectiveXFlip && !effectiveYFlip) lookup =
+            [
                 0x00, 0x01, 0x02, 0x03,
                 0x04, 0x05, 0x06, 0x07,
                 0x08, 0x09, 0x0A, 0x0B,
@@ -354,20 +356,20 @@
                 0x14, 0x15, 0x16, 0x17,
                 0x18, 0x19, 0x1A, 0x1B,
                 0x1C, 0x1D, 0x1E, 0x1F,
-            };
-            else if (effectiveXFlip && !effectiveYFlip) lookup = new[]
-            {
-                0x03, 0x02, 0x01, 0x00, 
-                0x07, 0x06, 0x05, 0x04, 
-                0x0B, 0x0A, 0x09, 0x08, 
-                0x0F, 0x0E, 0x0D, 0x0C, 
-                0x13, 0x12, 0x11, 0x10, 
-                0x17, 0x16, 0x15, 0x14, 
-                0x1B, 0x1A, 0x19, 0x18, 
+            ];
+            else if (effectiveXFlip && !effectiveYFlip) lookup =
+            [
+                0x03, 0x02, 0x01, 0x00,
+                0x07, 0x06, 0x05, 0x04,
+                0x0B, 0x0A, 0x09, 0x08,
+                0x0F, 0x0E, 0x0D, 0x0C,
+                0x13, 0x12, 0x11, 0x10,
+                0x17, 0x16, 0x15, 0x14,
+                0x1B, 0x1A, 0x19, 0x18,
                 0x1F, 0x1E, 0x1D, 0x1C,
-            };
-            else if (!effectiveXFlip && effectiveYFlip) lookup = new[]
-            {
+            ];
+            else if (!effectiveXFlip && effectiveYFlip) lookup =
+            [
                 0x1C, 0x1D, 0x1E, 0x1F,
                 0x18, 0x19, 0x1A, 0x1B,
                 0x14, 0x15, 0x16, 0x17,
@@ -376,9 +378,9 @@
                 0x08, 0x09, 0x0A, 0x0B,
                 0x04, 0x05, 0x06, 0x07,
                 0x00, 0x01, 0x02, 0x03,
-            };
-            else lookup = new[]
-            {
+            ];
+            else lookup =
+            [
                 0x1F, 0x1E, 0x1D, 0x1C,
                 0x1B, 0x1A, 0x19, 0x18,
                 0x17, 0x16, 0x15, 0x14,
@@ -387,7 +389,7 @@
                 0x0B, 0x0A, 0x09, 0x08,
                 0x07, 0x06, 0x05, 0x04,
                 0x03, 0x02, 0x01, 0x00,
-            };
+            ];
 
             var tile1 = tilesAct1[tileAct1.Id];
             var tile2 = tilesAct2[tileAct2.Id];
@@ -407,7 +409,7 @@
             return true;
         }
 
-        static IList<IList<byte>> ReadTiles(string filename)
+        private static List<IList<byte>> ReadTiles(string filename)
         {
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
@@ -421,14 +423,14 @@
             while (file.Position != file.Length)
             {
                 var bytes = new byte[0x20];
-                file.Read(bytes);
+                file.ReadExactly(bytes);
                 list.Add(bytes);
             }
 
             return list;
         }
 
-        static void ReadSolids(string filename, IList<BlockInfo> blocks)
+        private static void ReadSolids(string filename, List<BlockInfo> blocks)
         {
             var file = File.OpenRead(Path.Combine(WorkingDir, filename));
 
@@ -436,7 +438,7 @@
                 block.Solidity = ReadWord(file);
         }
 
-        static IList<BlockInfo> ReadBlocks(string filename)
+        private static List<BlockInfo> ReadBlocks(string filename)
         {
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
@@ -462,7 +464,7 @@
             return list;
         }
 
-        static IList<ChunkInfo> ReadChunks(string filename)
+        private static List<ChunkInfo> ReadChunks(string filename)
         {
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
@@ -488,7 +490,7 @@
             return list;
         }
 
-        static LayoutInfo ReadLayout(string filename)
+        private static LayoutInfo ReadLayout(string filename)
         {
             var file = File.OpenRead(Path.Combine(WorkingDir, filename));
             var widthFG = ReadWord(file);
@@ -509,7 +511,7 @@
             return new LayoutInfo(foreground, background);
         }
 
-        static IList<LayoutRow> ReadLayoutRows(FileStream file, int bufferSize, int rowCount, IEnumerable<int> rowPtrs)
+        private static List<LayoutRow> ReadLayoutRows(FileStream file, int bufferSize, int rowCount, IEnumerable<int> rowPtrs)
         {
             var rows = new List<LayoutRow>(rowCount);
 
@@ -520,19 +522,19 @@
 
                 var buffer = new byte[bufferSize];
                 file.Seek(ptr - 0x8000, SeekOrigin.Begin);
-                file.Read(buffer);
+                file.ReadExactly(buffer);
                 rows.Add(new LayoutRow(buffer));
             }
 
             return rows;
         }
 
-        static int ReadWord(FileStream file)
+        private static int ReadWord(FileStream file)
         {
             return (file.ReadByte() << 8) | file.ReadByte();
         }
 
-        static void ProcessKosFile(string source, string destination, bool moduled, bool extract)
+        private static void ProcessKosFile(string source, string destination, bool moduled, bool extract)
         {
             var args = new StringBuilder();
 
@@ -553,34 +555,23 @@
         }
     }
 
-    internal class LayoutInfo
+    internal class LayoutInfo(List<LayoutRow> foreground, List<LayoutRow> background)
     {
-        public IList<LayoutRow> Foreground { get; set; }
+        public List<LayoutRow> Foreground { get; set; } = foreground;
 
-        public IList<LayoutRow> Background { get; set; }
-
-        public LayoutInfo(IList<LayoutRow> foreground, IList<LayoutRow> background)
-        {
-            Foreground = foreground;
-            Background = background;
-        }
+        public List<LayoutRow> Background { get; set; } = background;
 
         public IEnumerable<LayoutRow> Rows => Foreground.Concat(Background);
     }
 
-    internal class LayoutRow
+    internal class LayoutRow(IList<byte> chunks)
     {
-        public IList<byte> Chunks { get; set; }
-
-        public LayoutRow(IList<byte> chunks)
-        {
-            Chunks = chunks;
-        }
+        public IList<byte> Chunks { get; set; } = chunks;
     }
 
-    internal class ChunkInfo
+    internal class ChunkInfo(List<BlockRef> definition)
     {
-        public IList<BlockRef> Definition { get; set; }
+        public List<BlockRef> Definition { get; set; } = definition;
 
         public bool Used { get; set; }
 
@@ -589,11 +580,6 @@
         public byte Match { get; set; }
 
         public bool Confirmed { get; set; }
-
-        public ChunkInfo(IList<BlockRef> definition)
-        {
-            Definition = definition;
-        }
 
         public IEnumerable<int> Words => Definition.Select(blockRef => blockRef.Word);
     }
@@ -606,26 +592,17 @@
         Confirmed
     }
 
-    internal class BlockRef
+    internal class BlockRef(int word)
     {
-        public int Id { get; set; }
+        public int Id { get; set; } = word & 0x3FF;
 
-        public bool XFlip { get; set; }
+        public bool XFlip { get; set; } = (word & 0x400) != 0;
 
-        public bool YFlip { get; set; }
+        public bool YFlip { get; set; } = (word & 0x800) != 0;
 
-        public BlockSolidity ForegroundSolid { get; set; }
+        public BlockSolidity ForegroundSolid { get; set; } = (BlockSolidity)((word & 0x3000) >> 12);
 
-        public BlockSolidity BackgroundSolid { get; set; }
-
-        public BlockRef(int word)
-        {
-            Id = word & 0x3FF;
-            XFlip = (word & 0x400) != 0;
-            YFlip = (word & 0x800) != 0;
-            ForegroundSolid = (BlockSolidity)((word & 0x3000) >> 12);
-            BackgroundSolid = (BlockSolidity)((word & 0xC000) >> 14);
-        }
+        public BlockSolidity BackgroundSolid { get; set; } = (BlockSolidity)((word & 0xC000) >> 14);
 
         public int Word =>
             (int)BackgroundSolid << 14 |
@@ -643,40 +620,26 @@
         All
     }
 
-    internal class BlockInfo
+    internal class BlockInfo(List<TileRef> definition)
     {
-        public IList<TileRef> Definition { get; set; }
+        public List<TileRef> Definition { get; set; } = definition;
 
         public int Solidity { get; set; }
-
-        public BlockInfo(IList<TileRef> definition)
-        {
-            Definition = definition;
-        }
 
         public IEnumerable<int> Words => Definition.Select(tileRef => tileRef.Word);
     }
 
-    internal class TileRef
+    internal class TileRef(int word)
     {
-        public int Id { get; set; }
+        public int Id { get; set; } = word & 0x7FF;
 
-        public bool XFlip { get; set; }
+        public bool XFlip { get; set; } = (word & 0x800) != 0;
 
-        public bool YFlip { get; set; }
+        public bool YFlip { get; set; } = (word & 0x1000) != 0;
 
-        public byte Palette { get; set; }
+        public byte Palette { get; set; } = (byte)((word & 0x6000) >> 13);
 
-        public bool Priority { get; set; }
-
-        public TileRef(int word)
-        {
-            Id = word & 0x7FF;
-            XFlip = (word & 0x800) != 0;
-            YFlip = (word & 0x1000) != 0;
-            Palette = (byte)((word & 0x6000) >> 13);
-            Priority = (word & 0x8000) != 0;
-        }
+        public bool Priority { get; set; } = (word & 0x8000) != 0;
 
         public int Word =>
             (Priority ? 0x8000 : 0) |
@@ -712,9 +675,9 @@
 
     internal class BlockReport
     {
-        public IList<BlockConfirmMatch> ConfirmMatches { get; set; }
+        public List<BlockConfirmMatch> ConfirmMatches { get; set; }
 
-        public BlockReport(IList<BlockConfirmMatch> blockConfirm)
+        public BlockReport(List<BlockConfirmMatch> blockConfirm)
         {
             ConfirmMatches = blockConfirm;
         }
@@ -773,38 +736,36 @@
 
     internal class ChunkReport
     {
-        public IList<IList<string>> ConfirmMatches { get; set; }
+        public List<List<string>> ConfirmMatches { get; set; }
 
-        public IList<IList<string>> DuplicatesAct1 { get; set; }
+        public List<List<string>> DuplicatesAct1 { get; set; }
 
-        public IList<IList<string>> DuplicatesAct2 { get; set; }
+        public List<List<string>> DuplicatesAct2 { get; set; }
 
-        public IList<ChunkIgnoreMatch> IgnoreMatches { get; set; }
+        public List<ChunkIgnoreMatch> IgnoreMatches { get; set; }
 
-        public ChunkReport(IList<ChunkInfo> chunksAct1, IList<ChunkInfo> chunksAct2, Dictionary<int, IList<int>?> chunkIgnore)
+        public ChunkReport(List<ChunkInfo> chunksAct1, List<ChunkInfo> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
         {
-            ConfirmMatches = chunksAct1
+            ConfirmMatches = [.. chunksAct1
                 .Select((chunk, index) => (chunk, index))
                 .Where(match => match.chunk.MatchType == MatchType.Pending)
                 .Select(match => new List<string>
                 {
                     match.index.ToString("X"),
                     match.chunk.Match.ToString("X")
-                }
-                as IList<string>)
-                .ToList();
+                })];
             DuplicatesAct1 = CollectDuplicates(chunksAct1);
             DuplicatesAct2 = CollectDuplicates(chunksAct2);
-            IgnoreMatches = new List<ChunkIgnoreMatch>();
+            IgnoreMatches = [];
 
-            if (!chunkIgnore.Any())
-                IgnoreMatches.Add(new ChunkIgnoreMatch(0, new List<int> { 0 }));
+            if (chunkIgnore.Count == 0)
+                IgnoreMatches.Add(new ChunkIgnoreMatch(0, [0]));
 
             else foreach (var index1 in chunkIgnore.Keys)
-            {
-                var ignore = chunkIgnore[index1];
-                IgnoreMatches.Add(new ChunkIgnoreMatch(index1, ignore));
-            }
+                {
+                    var ignore = chunkIgnore[index1];
+                    IgnoreMatches.Add(new ChunkIgnoreMatch(index1, ignore));
+                }
         }
 
 #pragma warning disable CS8618
@@ -813,9 +774,9 @@
         }
 #pragma warning restore CS8618
 
-        private static IList<IList<string>> CollectDuplicates(IList<ChunkInfo> chunks)
+        private static List<List<string>> CollectDuplicates(List<ChunkInfo> chunks)
         {
-            return chunks
+            return [.. chunks
                 .Select((chunk, index) => (chunk, index))
                 .Where(match => match.chunk.MatchType == MatchType.Duplicate)
                 .GroupBy(match => match.chunk.Match)
@@ -824,8 +785,7 @@
                     .Select(chunk => chunk.index)
                     .Prepend(group.Key)
                     .Select(index => index.ToString("X"))
-                    .ToList() as IList<string>)
-                .ToList();
+                    .ToList())];
         }
     }
 
@@ -833,9 +793,9 @@
     {
         public string Chunk1 { get; set; }
 
-        public IList<string>? Chunk2 { get; set; }
+        public List<string>? Chunk2 { get; set; }
 
-        public ChunkIgnoreMatch(int index1, IList<int>? ignore)
+        public ChunkIgnoreMatch(int index1, List<int>? ignore)
         {
             Chunk1 = index1.ToString("X");
             Chunk2 = ignore?.Select(index2 => index2.ToString("X")).ToList();
