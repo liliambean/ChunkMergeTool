@@ -1,57 +1,36 @@
 ﻿using ChunkMergeTool.Analysis;
 using ChunkMergeTool.LevelData;
-using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using System.Text.Json;
 
 namespace ChunkMergeTool
 {
     internal class Program
     {
-        private static readonly string WorkingDir = @"D:\s3unlocked\Levels\LBZ\Chunks";
-
-        private static readonly string FileBlocksReport = @"blocks.txt";
-        private static readonly string FileChunksReport = @"chunks.txt";
-
-        private static readonly string FileLayoutAct1 = @"..\Layout\1.bin";
-        private static readonly string FileLayoutAct2 = @"..\Layout\2.bin";
-        private static readonly string FileCollisionAct1 = @"..\Collision\1.bin";
-        private static readonly string FileCollisionAct2 = @"..\Collision\2.bin";
-
-        private static readonly string FileChunksAct1 = @"Act 1";
-        private static readonly string FileChunksAct2 = @"Act 2";
-        private static readonly string FileBlocksPrimary = @"..\Blocks\Primary";
-        private static readonly string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
-        private static readonly string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
-        private static readonly string FileTilesPrimary = @"..\Tiles\Primary";
-        private static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
-        private static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
-
         private static readonly JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
 
         private static void Main()
         {
-            var layoutAct1 = LoadLayout(FileLayoutAct1);
-            var layoutAct2 = LoadLayout(FileLayoutAct2);
-            var chunksAct1 = LoadChunks(FileChunksAct1);
-            var chunksAct2 = LoadChunks(FileChunksAct2);
+            var layoutAct1 = LayoutInfo.Load(Utils.FileLayoutAct1);
+            var layoutAct2 = LayoutInfo.Load(Utils.FileLayoutAct2);
+            var chunksAct1 = ChunkInfo.Load(Utils.FileChunksAct1);
+            var chunksAct2 = ChunkInfo.Load(Utils.FileChunksAct2);
 
             chunksAct1[0xDA].Used = true; // Pasted into layout when miniboss starts
             chunksAct2[0xA6].Used = true; // Alt death egg booster pasted into layout during cutscene
             chunksAct2[0xA7].Used = true; // Alt death egg booster pasted into layout during cutscene
-            MarkChunksUsedIfPresentInLayout(chunksAct1, layoutAct1);
-            MarkChunksUsedIfPresentInLayout(chunksAct2, layoutAct2);
+            ChunkInfo.MarkUsedIfExistsInLayout(chunksAct1, layoutAct1);
+            ChunkInfo.MarkUsedIfExistsInLayout(chunksAct2, layoutAct2);
 
-            var blocksPrimary = LoadBlocks(FileBlocksPrimary);
-            var blocksAct1 = blocksPrimary.Concat(LoadBlocks(FileBlocksAct1)).ToList();
-            var blocksAct2 = blocksPrimary.Concat(LoadBlocks(FileBlocksAct2)).ToList();
-            LoadCollisionAndSaveToBlocks(FileCollisionAct1, blocksAct1);
-            LoadCollisionAndSaveToBlocks(FileCollisionAct2, blocksAct2);
+            var blocksPrimary = BlockInfo.Load(Utils.FileBlocksPrimary);
+            var blocksAct1 = blocksPrimary.Concat(BlockInfo.Load(Utils.FileBlocksAct1)).ToList();
+            var blocksAct2 = blocksPrimary.Concat(BlockInfo.Load(Utils.FileBlocksAct2)).ToList();
+            BlockInfo.LoadCollisionIntoBlocks(Utils.FileCollisionAct1, blocksAct1);
+            BlockInfo.LoadCollisionIntoBlocks(Utils.FileCollisionAct2, blocksAct2);
 
-            var tilesPrimary = LoadTiles(FileTilesPrimary);
-            var tilesAct1 = tilesPrimary.Concat(LoadTiles(FileTilesAct1)).ToList();
-            var tilesAct2 = tilesPrimary.Concat(LoadTiles(FileTilesAct2)).ToList();
+            var tilesPrimary = TileInfo.Load(Utils.FileTilesPrimary);
+            var tilesAct1 = tilesPrimary.Concat(TileInfo.Load(Utils.FileTilesAct1)).ToList();
+            var tilesAct2 = tilesPrimary.Concat(TileInfo.Load(Utils.FileTilesAct2)).ToList();
 
             MarkDuplicateChunks(chunksAct1);
             MarkDuplicateChunks(chunksAct2);
@@ -77,13 +56,6 @@ namespace ChunkMergeTool
                 Console.WriteLine("Tile mismatch error");
                 return;
             }
-        }
-
-        private static void MarkChunksUsedIfPresentInLayout(List<ChunkInfo> chunks, LayoutInfo layout)
-        {
-            foreach (var row in layout.Rows)
-                foreach (var chunk in row.Chunks)
-                    chunks[chunk].Used = true;
         }
 
         private static void MarkDuplicateChunks(List<ChunkInfo> chunks)
@@ -128,7 +100,7 @@ namespace ChunkMergeTool
         {
             var chunkIgnore = new Dictionary<int, List<int>?>();
             var chunkConfirm = new List<(int, int)>();
-            var path = Path.Combine(WorkingDir, FileChunksReport);
+            var path = Path.Combine(Utils.WorkingDir, Utils.FileChunksReport);
 
             if (File.Exists(path) && File.ReadAllText(path) is { Length: > 0 } text)
             {
@@ -268,7 +240,7 @@ namespace ChunkMergeTool
                     blockConfirm.Add(new BlockConfirmMatch(index, mapping));
             }
 
-            var path = Path.Combine(WorkingDir, FileBlocksReport);
+            var path = Path.Combine(Utils.WorkingDir, Utils.FileBlocksReport);
 
             if (File.Exists(path) && File.ReadAllText(path) is { Length: > 0 } text)
             {
@@ -411,146 +383,6 @@ namespace ChunkMergeTool
             return true;
         }
 
-        private static List<IList<byte>> LoadTiles(string filename)
-        {
-            var compressed = $"{filename}.bin";
-            var uncompressed = $"{filename} unc.bin";
-            ProcessKosFile(compressed, uncompressed, moduled: true, extract: true);
-
-            var file = File.OpenRead(Path.Combine(WorkingDir, uncompressed));
-            var list = new List<IList<byte>>();
-
-            while (file.Position != file.Length)
-            {
-                var bytes = new byte[0x20];
-                file.ReadExactly(bytes);
-                list.Add(bytes);
-            }
-
-            return list;
-        }
-
-        private static void LoadCollisionAndSaveToBlocks(string filename, List<BlockInfo> blocks)
-        {
-            var file = File.OpenRead(Path.Combine(WorkingDir, filename));
-
-            foreach (var block in blocks)
-                block.Solidity = ReadWord(file);
-        }
-
-        private static List<BlockInfo> LoadBlocks(string filename)
-        {
-            var compressed = $"{filename}.bin";
-            var uncompressed = $"{filename} unc.bin";
-            ProcessKosFile(compressed, uncompressed, moduled: false, extract: true);
-
-            var file = File.OpenRead(Path.Combine(WorkingDir, uncompressed));
-            var list = new List<BlockInfo>();
-
-            while (file.Position != file.Length)
-            {
-                var definition = new List<TileRef>(4);
-                for (var index = 0; index < 4; index++)
-                {
-                    var word = ReadWord(file);
-                    definition.Add(new TileRef(word));
-                }
-
-                list.Add(new BlockInfo(definition));
-            }
-
-            return list;
-        }
-
-        private static List<ChunkInfo> LoadChunks(string filename)
-        {
-            var compressed = $"{filename}.bin";
-            var uncompressed = $"{filename} unc.bin";
-            ProcessKosFile(compressed, uncompressed, moduled: false, extract: true);
-
-            var file = File.OpenRead(Path.Combine(WorkingDir, uncompressed));
-            var list = new List<ChunkInfo>();
-
-            while (file.Position != file.Length)
-            {
-                var definition = new List<BlockRef>(0x40);
-                for (var index = 0; index < 0x40; index++)
-                {
-                    var word = ReadWord(file);
-                    definition.Add(new BlockRef(word));
-                }
-
-                list.Add(new ChunkInfo(definition));
-            }
-
-            return list;
-        }
-
-        private static LayoutInfo LoadLayout(string filename)
-        {
-            var file = File.OpenRead(Path.Combine(WorkingDir, filename));
-            var widthFG = ReadWord(file);
-            var widthBG = ReadWord(file);
-            var heightFG = ReadWord(file);
-            var heightBG = ReadWord(file);
-            var ptrsFG = new List<int>(0x20);
-            var ptrsBG = new List<int>(0x20);
-
-            for (var index = 0; index < 0x20; index++)
-            {
-                ptrsFG.Add(ReadWord(file));
-                ptrsBG.Add(ReadWord(file));
-            }
-
-            var foreground = ReadLayoutRows(file, widthFG, heightFG, ptrsFG);
-            var background = ReadLayoutRows(file, widthBG, heightBG, ptrsBG);
-            return new LayoutInfo(foreground, background);
-        }
-
-        private static List<LayoutRow> ReadLayoutRows(FileStream file, int bufferSize, int rowCount, IEnumerable<int> rowPtrs)
-        {
-            var rows = new List<LayoutRow>(rowCount);
-
-            foreach (var ptr in rowPtrs)
-            {
-                if (rows.Count == rowCount)
-                    break;
-
-                var buffer = new byte[bufferSize];
-                file.Seek(ptr - 0x8000, SeekOrigin.Begin);
-                file.ReadExactly(buffer);
-                rows.Add(new LayoutRow(buffer));
-            }
-
-            return rows;
-        }
-
-        private static int ReadWord(FileStream file)
-        {
-            return (file.ReadByte() << 8) | file.ReadByte();
-        }
-
-        private static void ProcessKosFile(string source, string destination, bool moduled, bool extract)
-        {
-            var args = new StringBuilder();
-
-            if (extract) { args.Append("-x "); }
-            if (moduled) { args.Append("-m "); }
-
-            args.Append('"');
-            args.Append(source);
-            args.Append("\" \"");
-            args.Append(destination);
-            args.Append('"');
-
-            var process = Process.Start(new ProcessStartInfo("koscmp.exe", args.ToString())
-            {
-                WorkingDirectory = WorkingDir,
-                CreateNoWindow = true
-            });
-
-            process!.WaitForExit();
-        }
     }
 
 }
