@@ -4,7 +4,7 @@
     {
         public List<TileRef> Definition { get; set; } = definition;
 
-        public int Solidity { get; set; }
+        public int Collision { get; set; }
 
         public IEnumerable<int> Words => Definition.Select(tileRef => tileRef.Word);
 
@@ -37,7 +37,7 @@
             var file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
 
             foreach (var block in blocks)
-                block.Solidity = Utils.ReadWord(file);
+                block.Collision = Utils.ReadWord(file);
         }
     }
 

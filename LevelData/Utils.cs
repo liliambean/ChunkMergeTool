@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace ChunkMergeTool.LevelData
@@ -47,7 +45,7 @@ namespace ChunkMergeTool.LevelData
             var process = Process.Start(new ProcessStartInfo("koscmp.exe", args.ToString())
             {
                 WorkingDirectory = WorkingDir,
-                CreateNoWindow = true
+                CreateNoWindow = true,
             });
 
             process!.WaitForExit();

@@ -382,7 +382,6 @@ namespace ChunkMergeTool
 
             return true;
         }
-
     }
 
 }

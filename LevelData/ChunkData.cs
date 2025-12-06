@@ -56,19 +56,19 @@ namespace ChunkMergeTool.LevelData
 
         public bool YFlip { get; set; } = (word & 0x800) != 0;
 
-        public BlockSolidity ForegroundSolid { get; set; } = (BlockSolidity)((word & 0x3000) >> 12);
+        public SolidKind SolidLayerA { get; set; } = (SolidKind)((word & 0x3000) >> 12);
 
-        public BlockSolidity BackgroundSolid { get; set; } = (BlockSolidity)((word & 0xC000) >> 14);
+        public SolidKind SolidLayerB { get; set; } = (SolidKind)((word & 0xC000) >> 14);
 
         public int Word =>
-            (int)BackgroundSolid << 14 |
-            (int)ForegroundSolid << 12 |
+            (int)SolidLayerB << 14 |
+            (int)SolidLayerA << 12 |
             (YFlip ? 0x800 : 0) |
             (XFlip ? 0x400 : 0) |
             Id;
     }
 
-    internal enum BlockSolidity : byte
+    internal enum SolidKind : byte
     {
         None,
         Top,
