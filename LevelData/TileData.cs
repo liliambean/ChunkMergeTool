@@ -1,21 +1,23 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal static class TileData
+    internal class TileData(IList<byte> bytes)
     {
-        public static List<IList<byte>> Load(string filename)
+        public IList<byte> Bytes { get; set; } = bytes;
+
+        public static List<TileData> Load(string filename)
         {
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
             Utils.ProcessKosFile(compressed, uncompressed, moduled: true, extract: true);
 
             var file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
-            var list = new List<IList<byte>>();
+            var list = new List<TileData>();
 
             while (file.Position != file.Length)
             {
                 var bytes = new byte[0x20];
                 file.ReadExactly(bytes);
-                list.Add(bytes);
+                list.Add(new TileData(bytes));
             }
 
             return list;

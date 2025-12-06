@@ -270,7 +270,7 @@ namespace ChunkMergeTool
             return blockConfirm;
         }
 
-        private static bool AnalyzeTiles(List<BlockConfirmMatch> blockConfirm, List<BlockData> blocksAct1, List<BlockData> blocksAct2, List<IList<byte>> tilesAct1, List<IList<byte>> tilesAct2)
+        private static bool AnalyzeTiles(List<BlockConfirmMatch> blockConfirm, List<BlockData> blocksAct1, List<BlockData> blocksAct2, List<TileData> tilesAct1, List<TileData> tilesAct2)
         {
             foreach (var match in blockConfirm)
             {
@@ -314,10 +314,10 @@ namespace ChunkMergeTool
             return true;
         }
 
-        private static bool CompareTiles(TileRef tileAct1, TileRef tileAct2, List<IList<byte>> tilesAct1, List<IList<byte>> tilesAct2, bool xFlip, bool yFlip)
+        private static bool CompareTiles(TileRef tileRef1, TileRef tileRef2, List<TileData> tilesAct1, List<TileData> tilesAct2, bool xFlip, bool yFlip)
         {
-            var effectiveXFlip = xFlip ^ tileAct1.XFlip ^ tileAct2.XFlip;
-            var effectiveYFlip = yFlip ^ tileAct1.YFlip ^ tileAct2.YFlip;
+            var effectiveXFlip = xFlip ^ tileRef1.XFlip ^ tileRef2.XFlip;
+            var effectiveYFlip = yFlip ^ tileRef1.YFlip ^ tileRef2.YFlip;
             IList<int> lookup;
 
             if (!effectiveXFlip && !effectiveYFlip) lookup =
@@ -365,13 +365,13 @@ namespace ChunkMergeTool
                 0x03, 0x02, 0x01, 0x00,
             ];
 
-            var tile1 = tilesAct1[tileAct1.Id];
-            var tile2 = tilesAct2[tileAct2.Id];
+            var tile1 = tilesAct1[tileRef1.Id];
+            var tile2 = tilesAct2[tileRef2.Id];
 
             for (var index = 0; index < 0x20; index++)
             {
-                var byte1 = tile1[index];
-                var byte2 = tile2[lookup[index]];
+                var byte1 = tile1.Bytes[index];
+                var byte2 = tile2.Bytes[lookup[index]];
 
                 if (effectiveXFlip)
                     byte2 = (byte)(((byte2 & 0x0F) << 4) | ((byte2 & 0xF0) >> 4));
