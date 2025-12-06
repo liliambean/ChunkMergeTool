@@ -5,26 +5,26 @@
     using System.Globalization;
     using System.Text;
     using System.Text.Json;
-    using System.Text.Json.Serialization;
 
     internal class Program
     {
         private static readonly string WorkingDir = @"D:\s3unlocked\Levels\LBZ\Chunks";
+        private static readonly string FileBlocksReport = @"blocks.txt";
+        private static readonly string FileChunksReport = @"chunks.txt";
+
+        private static readonly string FileTilesPrimary = @"..\Tiles\Primary";
+        private static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
+        private static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
+        private static readonly string FileBlocksPrimary = @"..\Blocks\Primary";
+        private static readonly string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
+        private static readonly string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
+        private static readonly string FileChunksAct1 = @"Act 1";
+        private static readonly string FileChunksAct2 = @"Act 2";
+
         private static readonly string FileLayoutAct1 = @"..\Layout\1.bin";
         private static readonly string FileLayoutAct2 = @"..\Layout\2.bin";
         private static readonly string FileSolidsAct1 = @"..\Collision\1.bin";
         private static readonly string FileSolidsAct2 = @"..\Collision\2.bin";
-
-        private static readonly string FileChunksAct1 = "Act 1";
-        private static readonly string FileChunksAct2 = "Act 2";
-        private static readonly string FileChunksReport = @"chunks.txt";
-        private static readonly string FileBlocksCommon = @"..\Blocks\Primary";
-        private static readonly string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
-        private static readonly string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
-        private static readonly string FileBlocksReport = @"blocks.txt";
-        private static readonly string FileTilesCommon = @"..\Tiles\Primary";
-        private static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
-        private static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
 
         private static readonly JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
 
@@ -35,19 +35,19 @@
             var chunksAct1 = ReadChunks(FileChunksAct1);
             var chunksAct2 = ReadChunks(FileChunksAct2);
 
-            var blocksCommon = ReadBlocks(FileBlocksCommon);
-            var blocksAct1 = blocksCommon.Concat(ReadBlocks(FileBlocksAct1)).ToList();
-            var blocksAct2 = blocksCommon.Concat(ReadBlocks(FileBlocksAct2)).ToList();
+            var blocksPrimary = ReadBlocks(FileBlocksPrimary);
+            var blocksAct1 = blocksPrimary.Concat(ReadBlocks(FileBlocksAct1)).ToList();
+            var blocksAct2 = blocksPrimary.Concat(ReadBlocks(FileBlocksAct2)).ToList();
             ReadSolids(FileSolidsAct1, blocksAct1);
             ReadSolids(FileSolidsAct2, blocksAct2);
 
-            var tilesCommon = ReadTiles(FileTilesCommon);
-            var tilesAct1 = tilesCommon.Concat(ReadTiles(FileTilesAct1)).ToList();
-            var tilesAct2 = tilesCommon.Concat(ReadTiles(FileTilesAct2)).ToList();
+            var tilesPrimary = ReadTiles(FileTilesPrimary);
+            var tilesAct1 = tilesPrimary.Concat(ReadTiles(FileTilesAct1)).ToList();
+            var tilesAct2 = tilesPrimary.Concat(ReadTiles(FileTilesAct2)).ToList();
 
-            chunksAct1[0xDA].Used = true;
-            chunksAct2[0xA6].Used = true;
-            chunksAct2[0xA7].Used = true;
+            chunksAct1[0xDA].Used = true; // Pasted into layout when miniboss starts
+            chunksAct2[0xA6].Used = true; // Alt death egg booster pasted into layout during cutscene
+            chunksAct2[0xA7].Used = true; // Alt death egg booster pasted into layout during cutscene
             MarkUsedChunks(chunksAct1, layoutAct1);
             MarkUsedChunks(chunksAct2, layoutAct2);
 
@@ -56,7 +56,7 @@
             BlankUnusedChunks(chunksAct1);
             BlankUnusedChunks(chunksAct2);
 
-            var blockMappings = AnalyzeChunks(chunksAct1, chunksAct2, blocksCommon.Count);
+            var blockMappings = AnalyzeChunks(chunksAct1, chunksAct2, blocksPrimary.Count);
             if (blockMappings == null)
             {
                 Console.WriteLine("Completed with errors; a report has been created.");
@@ -131,14 +131,14 @@
             if (File.Exists(path) && File.ReadAllText(path) is { Length: > 0 } text)
             {
                 var report = JsonSerializer.Deserialize<ChunkReport>(text)!;
-                foreach (var ignore in report.IgnoreMatches)
+                foreach (var ignore in report.IgnoreMatches!)
                 {
-                    var index1 = int.Parse(ignore.Chunk1, NumberStyles.HexNumber);
+                    var index1 = int.Parse(ignore.Chunk1!, NumberStyles.HexNumber);
                     var index2 = ignore.Chunk2?.Select(index => int.Parse(index, NumberStyles.HexNumber)).ToList();
                     chunkIgnore.Add(index1, index2);
                 }
 
-                foreach (var confirm in report.ConfirmMatches)
+                foreach (var confirm in report.ConfirmMatches!)
                 {
                     var index1 = int.Parse(confirm[0], NumberStyles.HexNumber);
                     var index2 = int.Parse(confirm[1], NumberStyles.HexNumber);
@@ -271,7 +271,7 @@
             if (File.Exists(path) && File.ReadAllText(path) is { Length: > 0 } text)
             {
                 var report = JsonSerializer.Deserialize<BlockReport>(text)!;
-                foreach (var confirm in report.ConfirmMatches)
+                foreach (var confirm in report.ConfirmMatches!)
                 {
                     if (blockConfirm.FirstOrDefault(match => match.Block1 == confirm.Block1
                         && match.Block2 == confirm.Block2) is BlockConfirmMatch match)
@@ -415,8 +415,6 @@
             var uncompressed = $"{filename} unc.bin";
             ProcessKosFile(compressed, uncompressed, moduled: true, extract: true);
 
-            Thread.Sleep(3000);
-
             var file = File.OpenRead(Path.Combine(WorkingDir, uncompressed));
             var list = new List<IList<byte>>();
 
@@ -444,8 +442,6 @@
             var uncompressed = $"{filename} unc.bin";
             ProcessKosFile(compressed, uncompressed, moduled: false, extract: true);
 
-            Thread.Sleep(3000);
-
             var file = File.OpenRead(Path.Combine(WorkingDir, uncompressed));
             var list = new List<BlockInfo>();
 
@@ -469,8 +465,6 @@
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
             ProcessKosFile(compressed, uncompressed, moduled: false, extract: true);
-
-            Thread.Sleep(3000);
 
             var file = File.OpenRead(Path.Combine(WorkingDir, uncompressed));
             var list = new List<ChunkInfo>();
@@ -547,265 +541,14 @@
             args.Append(destination);
             args.Append('"');
 
-            Process.Start(new ProcessStartInfo("koscmp.exe", args.ToString())
+            var process = Process.Start(new ProcessStartInfo("koscmp.exe", args.ToString())
             {
                 WorkingDirectory = WorkingDir,
                 CreateNoWindow = true
             });
+
+            process!.WaitForExit();
         }
-    }
-
-    internal class LayoutInfo(List<LayoutRow> foreground, List<LayoutRow> background)
-    {
-        public List<LayoutRow> Foreground { get; set; } = foreground;
-
-        public List<LayoutRow> Background { get; set; } = background;
-
-        public IEnumerable<LayoutRow> Rows => Foreground.Concat(Background);
-    }
-
-    internal class LayoutRow(IList<byte> chunks)
-    {
-        public IList<byte> Chunks { get; set; } = chunks;
-    }
-
-    internal class ChunkInfo(List<BlockRef> definition)
-    {
-        public List<BlockRef> Definition { get; set; } = definition;
-
-        public bool Used { get; set; }
-
-        public MatchType MatchType { get; set; }
-
-        public byte Match { get; set; }
-
-        public bool Confirmed { get; set; }
-
-        public IEnumerable<int> Words => Definition.Select(blockRef => blockRef.Word);
-    }
-
-    internal enum MatchType
-    {
-        Unique,
-        Duplicate,
-        Pending,
-        Confirmed
-    }
-
-    internal class BlockRef(int word)
-    {
-        public int Id { get; set; } = word & 0x3FF;
-
-        public bool XFlip { get; set; } = (word & 0x400) != 0;
-
-        public bool YFlip { get; set; } = (word & 0x800) != 0;
-
-        public BlockSolidity ForegroundSolid { get; set; } = (BlockSolidity)((word & 0x3000) >> 12);
-
-        public BlockSolidity BackgroundSolid { get; set; } = (BlockSolidity)((word & 0xC000) >> 14);
-
-        public int Word =>
-            (int)BackgroundSolid << 14 |
-            (int)ForegroundSolid << 12 |
-            (YFlip ? 0x800 : 0) |
-            (XFlip ? 0x400 : 0) |
-            Id;
-    }
-
-    internal enum BlockSolidity : byte
-    {
-        None,
-        Top,
-        Sides,
-        All
-    }
-
-    internal class BlockInfo(List<TileRef> definition)
-    {
-        public List<TileRef> Definition { get; set; } = definition;
-
-        public int Solidity { get; set; }
-
-        public IEnumerable<int> Words => Definition.Select(tileRef => tileRef.Word);
-    }
-
-    internal class TileRef(int word)
-    {
-        public int Id { get; set; } = word & 0x7FF;
-
-        public bool XFlip { get; set; } = (word & 0x800) != 0;
-
-        public bool YFlip { get; set; } = (word & 0x1000) != 0;
-
-        public byte Palette { get; set; } = (byte)((word & 0x6000) >> 13);
-
-        public bool Priority { get; set; } = (word & 0x8000) != 0;
-
-        public int Word =>
-            (Priority ? 0x8000 : 0) |
-            (Palette << 13) |
-            (YFlip ? 0x800 : 0) |
-            (XFlip ? 0x400 : 0) |
-            Id;
-    }
-
-    internal class BlockMapping
-    {
-        public int Id { get; set; }
-
-        public byte Chunk1 { get; set; }
-
-        public byte Chunk2 { get; set; }
-
-        public bool Common { get; set; }
-
-        public BlockMapping(int id)
-        {
-            Id = id;
-            Common = true;
-        }
-
-        public BlockMapping(int id, byte chunk1, byte chunk2)
-        {
-            Id = id;
-            Chunk1 = chunk1;
-            Chunk2 = chunk2;
-        }
-    }
-
-    internal class BlockReport
-    {
-        public List<BlockConfirmMatch> ConfirmMatches { get; set; }
-
-        public BlockReport(List<BlockConfirmMatch> blockConfirm)
-        {
-            ConfirmMatches = blockConfirm;
-        }
-
-#pragma warning disable CS8618
-        public BlockReport()
-        {
-        }
-#pragma warning restore CS8618
-    }
-
-    internal class BlockConfirmMatch
-    {
-        public string BlockAct1
-        {
-            get => Block1.ToString("X");
-            set => Block1 = int.Parse(value, NumberStyles.HexNumber);
-        }
-
-        public string BlockAct2
-        {
-            get => Block2.ToString("X");
-            set => Block2 = int.Parse(value, NumberStyles.HexNumber);
-        }
-
-        [JsonIgnore]
-        public int Block1 { get; set; }
-
-        [JsonIgnore]
-        public int Block2 { get; set; }
-
-        [JsonIgnore]
-        public BlockMapping Mapping { get; set; }
-
-        [JsonIgnore]
-        public MatchType MatchType { get; set; }
-
-        public bool XFlip { get; set; }
-
-        public bool YFlip { get; set; }
-
-        public BlockConfirmMatch(int id, BlockMapping mapping)
-        {
-            Block1 = id;
-            Block2 = mapping.Id;
-            Mapping = mapping;
-            MatchType = MatchType.Pending;
-        }
-
-#pragma warning disable CS8618
-        public BlockConfirmMatch()
-        {
-        }
-#pragma warning restore CS8618
-    }
-
-    internal class ChunkReport
-    {
-        public List<List<string>> ConfirmMatches { get; set; }
-
-        public List<List<string>> DuplicatesAct1 { get; set; }
-
-        public List<List<string>> DuplicatesAct2 { get; set; }
-
-        public List<ChunkIgnoreMatch> IgnoreMatches { get; set; }
-
-        public ChunkReport(List<ChunkInfo> chunksAct1, List<ChunkInfo> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
-        {
-            ConfirmMatches = [.. chunksAct1
-                .Select((chunk, index) => (chunk, index))
-                .Where(match => match.chunk.MatchType == MatchType.Pending)
-                .Select(match => new List<string>
-                {
-                    match.index.ToString("X"),
-                    match.chunk.Match.ToString("X")
-                })];
-            DuplicatesAct1 = CollectDuplicates(chunksAct1);
-            DuplicatesAct2 = CollectDuplicates(chunksAct2);
-            IgnoreMatches = [];
-
-            if (chunkIgnore.Count == 0)
-                IgnoreMatches.Add(new ChunkIgnoreMatch(0, [0]));
-
-            else foreach (var index1 in chunkIgnore.Keys)
-                {
-                    var ignore = chunkIgnore[index1];
-                    IgnoreMatches.Add(new ChunkIgnoreMatch(index1, ignore));
-                }
-        }
-
-#pragma warning disable CS8618
-        public ChunkReport()
-        {
-        }
-#pragma warning restore CS8618
-
-        private static List<List<string>> CollectDuplicates(List<ChunkInfo> chunks)
-        {
-            return [.. chunks
-                .Select((chunk, index) => (chunk, index))
-                .Where(match => match.chunk.MatchType == MatchType.Duplicate)
-                .GroupBy(match => match.chunk.Match)
-                .OrderBy(group => group.Key)
-                .Select(group => group
-                    .Select(chunk => chunk.index)
-                    .Prepend(group.Key)
-                    .Select(index => index.ToString("X"))
-                    .ToList())];
-        }
-    }
-
-    internal class ChunkIgnoreMatch
-    {
-        public string Chunk1 { get; set; }
-
-        public List<string>? Chunk2 { get; set; }
-
-        public ChunkIgnoreMatch(int index1, List<int>? ignore)
-        {
-            Chunk1 = index1.ToString("X");
-            Chunk2 = ignore?.Select(index2 => index2.ToString("X")).ToList();
-        }
-
-#pragma warning disable CS8618
-        public ChunkIgnoreMatch()
-        {
-        }
-#pragma warning restore CS8618
     }
 
 }
