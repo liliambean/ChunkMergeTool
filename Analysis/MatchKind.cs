@@ -1,6 +1,6 @@
-﻿namespace ChunkMergeTool
+﻿namespace ChunkMergeTool.Analysis
 {
-    internal enum MatchType
+    internal enum MatchKind
     {
         Unique,
         Duplicate,

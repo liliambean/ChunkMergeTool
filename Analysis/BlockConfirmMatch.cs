@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.Json.Serialization;
 
-namespace ChunkMergeTool
+namespace ChunkMergeTool.Analysis
 {
     internal class BlockConfirmMatch
     {
@@ -27,7 +27,7 @@ namespace ChunkMergeTool
         public BlockMapping? Mapping { get; set; }
 
         [JsonIgnore]
-        public MatchType MatchType { get; set; }
+        public MatchKind MatchKind { get; set; }
 
         public bool XFlip { get; set; }
 
@@ -38,7 +38,7 @@ namespace ChunkMergeTool
             Block1 = id;
             Block2 = mapping.Id;
             Mapping = mapping;
-            MatchType = MatchType.Pending;
+            MatchKind = MatchKind.Pending;
         }
 
         public BlockConfirmMatch()

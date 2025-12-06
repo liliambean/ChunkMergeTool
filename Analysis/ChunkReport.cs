@@ -1,6 +1,6 @@
 ﻿using ChunkMergeTool.LevelData;
 
-namespace ChunkMergeTool
+namespace ChunkMergeTool.Analysis
 {
     internal class ChunkReport
     {
@@ -16,7 +16,7 @@ namespace ChunkMergeTool
         {
             ConfirmMatches = [.. chunksAct1
                 .Select((chunk, index) => (chunk, index))
-                .Where(match => match.chunk.MatchType == MatchType.Pending)
+                .Where(match => match.chunk.MatchKind == MatchKind.Pending)
                 .Select(match => new List<string>
                 {
                     match.index.ToString("X"),
@@ -44,7 +44,7 @@ namespace ChunkMergeTool
         {
             return [.. chunks
                 .Select((chunk, index) => (chunk, index))
-                .Where(match => match.chunk.MatchType == MatchType.Duplicate)
+                .Where(match => match.chunk.MatchKind == MatchKind.Duplicate)
                 .GroupBy(match => match.chunk.Match)
                 .OrderBy(group => group.Key)
                 .Select(group => group

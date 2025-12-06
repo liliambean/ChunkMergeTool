@@ -1,4 +1,6 @@
-﻿namespace ChunkMergeTool.LevelData
+﻿using ChunkMergeTool.Analysis;
+
+namespace ChunkMergeTool.LevelData
 {
     internal class ChunkInfo(List<BlockRef> definition)
     {
@@ -6,7 +8,7 @@
 
         public bool Used { get; set; }
 
-        public MatchType MatchType { get; set; }
+        public MatchKind MatchKind { get; set; }
 
         public byte Match { get; set; }
 

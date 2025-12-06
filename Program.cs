@@ -1,4 +1,5 @@
-﻿using ChunkMergeTool.LevelData;
+﻿using ChunkMergeTool.Analysis;
+using ChunkMergeTool.LevelData;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -90,7 +91,7 @@ namespace ChunkMergeTool
             for (var index1 = 0; index1 < chunks.Count; index1++)
             {
                 var chunk1 = chunks[index1];
-                if (chunk1.MatchType == MatchType.Duplicate) continue;
+                if (chunk1.MatchKind == MatchKind.Duplicate) continue;
 
                 for (var index2 = 0; index2 < chunks.Count; index2++)
                 {
@@ -109,7 +110,7 @@ namespace ChunkMergeTool
 
                     if (match)
                     {
-                        chunk2.MatchType = MatchType.Duplicate;
+                        chunk2.MatchKind = MatchKind.Duplicate;
                         chunk2.Match = (byte)index1;
                     }
                 }
@@ -161,7 +162,7 @@ namespace ChunkMergeTool
                     continue;
 
                 var chunk1 = chunksAct1[index1];
-                if (!chunk1.Used || chunk1.MatchType != MatchType.Unique) continue;
+                if (!chunk1.Used || chunk1.MatchKind != MatchKind.Unique) continue;
 
                 for (int index2 = 1; index2 < chunksAct2.Count; index2++)
                 {
@@ -224,11 +225,11 @@ namespace ChunkMergeTool
                         errors = true;
                     }
 
-                    chunk1.MatchType = MatchType.Pending;
+                    chunk1.MatchKind = MatchKind.Pending;
                     chunk1.Match = (byte)index2;
 
                     if (chunkConfirm.Any(match => match.Item1 == index1 && match.Item2 == index2))
-                        chunk1.MatchType = MatchType.Confirmed;
+                        chunk1.MatchKind = MatchKind.Confirmed;
 
                     foreach (var m in guessedMappings)
                         blockMappings[m.Key] = new BlockMapping(m.Value, (byte)index1, (byte)index2);
@@ -236,12 +237,12 @@ namespace ChunkMergeTool
                     break;
                 }
 
-                if (chunk1.MatchType != MatchType.Unique)
+                if (chunk1.MatchKind != MatchKind.Unique)
                     continue;
             }
 
-            var pendingAct1 = chunksAct1.Any(chunk => chunk.MatchType == MatchType.Pending);
-            var pendingAct2 = chunksAct2.Any(chunk => chunk.MatchType == MatchType.Pending);
+            var pendingAct1 = chunksAct1.Any(chunk => chunk.MatchKind == MatchKind.Pending);
+            var pendingAct2 = chunksAct2.Any(chunk => chunk.MatchKind == MatchKind.Pending);
 
             if (pendingAct1 || pendingAct2 || errors)
             {
@@ -279,12 +280,12 @@ namespace ChunkMergeTool
                     {
                         match.XFlip = confirm.XFlip;
                         match.YFlip = confirm.YFlip;
-                        match.MatchType = MatchType.Confirmed;
+                        match.MatchKind = MatchKind.Confirmed;
                     }
                 }
             }
 
-            if (blockConfirm.Any(match => match.MatchType != MatchType.Confirmed))
+            if (blockConfirm.Any(match => match.MatchKind != MatchKind.Confirmed))
             {
                 var report = new BlockReport(blockConfirm);
 

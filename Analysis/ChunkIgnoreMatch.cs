@@ -1,4 +1,4 @@
-﻿namespace ChunkMergeTool
+﻿namespace ChunkMergeTool.Analysis
 {
     internal class ChunkIgnoreMatch
     {
