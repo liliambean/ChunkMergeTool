@@ -1,4 +1,4 @@
-﻿namespace ChunkMergeTool
+﻿namespace ChunkMergeTool.LevelData
 {
     internal class BlockInfo(List<TileRef> definition)
     {

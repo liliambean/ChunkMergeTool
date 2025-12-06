@@ -1,55 +1,56 @@
-﻿namespace ChunkMergeTool
-{
-    using System;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Text;
-    using System.Text.Json;
+﻿using ChunkMergeTool.LevelData;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
+using System.Text.Json;
 
+namespace ChunkMergeTool
+{
     internal class Program
     {
         private static readonly string WorkingDir = @"D:\s3unlocked\Levels\LBZ\Chunks";
+
         private static readonly string FileBlocksReport = @"blocks.txt";
         private static readonly string FileChunksReport = @"chunks.txt";
 
-        private static readonly string FileTilesPrimary = @"..\Tiles\Primary";
-        private static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
-        private static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
+        private static readonly string FileLayoutAct1 = @"..\Layout\1.bin";
+        private static readonly string FileLayoutAct2 = @"..\Layout\2.bin";
+        private static readonly string FileCollisionAct1 = @"..\Collision\1.bin";
+        private static readonly string FileCollisionAct2 = @"..\Collision\2.bin";
+
+        private static readonly string FileChunksAct1 = @"Act 1";
+        private static readonly string FileChunksAct2 = @"Act 2";
         private static readonly string FileBlocksPrimary = @"..\Blocks\Primary";
         private static readonly string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
         private static readonly string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
-        private static readonly string FileChunksAct1 = @"Act 1";
-        private static readonly string FileChunksAct2 = @"Act 2";
-
-        private static readonly string FileLayoutAct1 = @"..\Layout\1.bin";
-        private static readonly string FileLayoutAct2 = @"..\Layout\2.bin";
-        private static readonly string FileSolidsAct1 = @"..\Collision\1.bin";
-        private static readonly string FileSolidsAct2 = @"..\Collision\2.bin";
+        private static readonly string FileTilesPrimary = @"..\Tiles\Primary";
+        private static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
+        private static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
 
         private static readonly JsonSerializerOptions jsonOptions = new() { WriteIndented = true };
 
         private static void Main()
         {
-            var layoutAct1 = ReadLayout(FileLayoutAct1);
-            var layoutAct2 = ReadLayout(FileLayoutAct2);
-            var chunksAct1 = ReadChunks(FileChunksAct1);
-            var chunksAct2 = ReadChunks(FileChunksAct2);
-
-            var blocksPrimary = ReadBlocks(FileBlocksPrimary);
-            var blocksAct1 = blocksPrimary.Concat(ReadBlocks(FileBlocksAct1)).ToList();
-            var blocksAct2 = blocksPrimary.Concat(ReadBlocks(FileBlocksAct2)).ToList();
-            ReadSolids(FileSolidsAct1, blocksAct1);
-            ReadSolids(FileSolidsAct2, blocksAct2);
-
-            var tilesPrimary = ReadTiles(FileTilesPrimary);
-            var tilesAct1 = tilesPrimary.Concat(ReadTiles(FileTilesAct1)).ToList();
-            var tilesAct2 = tilesPrimary.Concat(ReadTiles(FileTilesAct2)).ToList();
+            var layoutAct1 = LoadLayout(FileLayoutAct1);
+            var layoutAct2 = LoadLayout(FileLayoutAct2);
+            var chunksAct1 = LoadChunks(FileChunksAct1);
+            var chunksAct2 = LoadChunks(FileChunksAct2);
 
             chunksAct1[0xDA].Used = true; // Pasted into layout when miniboss starts
             chunksAct2[0xA6].Used = true; // Alt death egg booster pasted into layout during cutscene
             chunksAct2[0xA7].Used = true; // Alt death egg booster pasted into layout during cutscene
-            MarkUsedChunks(chunksAct1, layoutAct1);
-            MarkUsedChunks(chunksAct2, layoutAct2);
+            MarkChunksUsedIfPresentInLayout(chunksAct1, layoutAct1);
+            MarkChunksUsedIfPresentInLayout(chunksAct2, layoutAct2);
+
+            var blocksPrimary = LoadBlocks(FileBlocksPrimary);
+            var blocksAct1 = blocksPrimary.Concat(LoadBlocks(FileBlocksAct1)).ToList();
+            var blocksAct2 = blocksPrimary.Concat(LoadBlocks(FileBlocksAct2)).ToList();
+            LoadCollisionAndSaveToBlocks(FileCollisionAct1, blocksAct1);
+            LoadCollisionAndSaveToBlocks(FileCollisionAct2, blocksAct2);
+
+            var tilesPrimary = LoadTiles(FileTilesPrimary);
+            var tilesAct1 = tilesPrimary.Concat(LoadTiles(FileTilesAct1)).ToList();
+            var tilesAct2 = tilesPrimary.Concat(LoadTiles(FileTilesAct2)).ToList();
 
             MarkDuplicateChunks(chunksAct1);
             MarkDuplicateChunks(chunksAct2);
@@ -77,7 +78,7 @@
             }
         }
 
-        private static void MarkUsedChunks(List<ChunkInfo> chunks, LayoutInfo layout)
+        private static void MarkChunksUsedIfPresentInLayout(List<ChunkInfo> chunks, LayoutInfo layout)
         {
             foreach (var row in layout.Rows)
                 foreach (var chunk in row.Chunks)
@@ -409,7 +410,7 @@
             return true;
         }
 
-        private static List<IList<byte>> ReadTiles(string filename)
+        private static List<IList<byte>> LoadTiles(string filename)
         {
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
@@ -428,7 +429,7 @@
             return list;
         }
 
-        private static void ReadSolids(string filename, List<BlockInfo> blocks)
+        private static void LoadCollisionAndSaveToBlocks(string filename, List<BlockInfo> blocks)
         {
             var file = File.OpenRead(Path.Combine(WorkingDir, filename));
 
@@ -436,7 +437,7 @@
                 block.Solidity = ReadWord(file);
         }
 
-        private static List<BlockInfo> ReadBlocks(string filename)
+        private static List<BlockInfo> LoadBlocks(string filename)
         {
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
@@ -460,7 +461,7 @@
             return list;
         }
 
-        private static List<ChunkInfo> ReadChunks(string filename)
+        private static List<ChunkInfo> LoadChunks(string filename)
         {
             var compressed = $"{filename}.bin";
             var uncompressed = $"{filename} unc.bin";
@@ -484,7 +485,7 @@
             return list;
         }
 
-        private static LayoutInfo ReadLayout(string filename)
+        private static LayoutInfo LoadLayout(string filename)
         {
             var file = File.OpenRead(Path.Combine(WorkingDir, filename));
             var widthFG = ReadWord(file);

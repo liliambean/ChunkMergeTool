@@ -1,4 +1,4 @@
-﻿namespace ChunkMergeTool
+﻿namespace ChunkMergeTool.LevelData
 {
     internal class BlockRef(int word)
     {
@@ -18,6 +18,14 @@
             (YFlip ? 0x800 : 0) |
             (XFlip ? 0x400 : 0) |
             Id;
+    }
+
+    internal enum BlockSolidity : byte
+    {
+        None,
+        Top,
+        Sides,
+        All
     }
 
 }

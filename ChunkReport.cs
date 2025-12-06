@@ -1,4 +1,6 @@
-﻿namespace ChunkMergeTool
+﻿using ChunkMergeTool.LevelData;
+
+namespace ChunkMergeTool
 {
     internal class ChunkReport
     {

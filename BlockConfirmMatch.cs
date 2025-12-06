@@ -1,8 +1,8 @@
-﻿namespace ChunkMergeTool
-{
-    using System.Globalization;
-    using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
+namespace ChunkMergeTool
+{
     internal class BlockConfirmMatch
     {
         public string BlockAct1
