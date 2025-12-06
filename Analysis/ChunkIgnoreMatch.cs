@@ -8,8 +8,8 @@
 
         public ChunkIgnoreMatch(int index1, List<int>? ignore)
         {
-            Chunk1 = index1.ToString("X");
-            Chunk2 = ignore?.Select(index2 => index2.ToString("X")).ToList();
+            Chunk1 = index1.ToString("X2");
+            Chunk2 = ignore?.Select(index2 => index2.ToString("X2")).ToList();
         }
 
         public ChunkIgnoreMatch()

@@ -7,13 +7,13 @@ namespace ChunkMergeTool.Analysis
     {
         public string BlockAct1
         {
-            get => Block1.ToString("X");
+            get => Block1.ToString("X3");
             set => Block1 = int.Parse(value, NumberStyles.HexNumber);
         }
 
         public string BlockAct2
         {
-            get => Block2.ToString("X");
+            get => Block2.ToString("X3");
             set => Block2 = int.Parse(value, NumberStyles.HexNumber);
         }
 

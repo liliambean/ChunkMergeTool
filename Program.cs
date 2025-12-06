@@ -185,13 +185,11 @@ namespace ChunkMergeTool
                             continue;
 
                         Console.WriteLine(
-                            $"Act 1 chunk: {index1:X}\r\n" +
-                            $"Act 2 chunk: {index2:X}\r\n" +
-                            $"Act 1 block: {block1.Id:X}\r\n" +
-                            $"Act 2 block: {block2.Id:X}\r\n" +
-                            $"Expected block: {expected.Id:X}\r\n" +
-                            (expected.Common ? "Block is part of primary set (shouldn't happen)" :
-                            $"Guess produced while mapping chunk {expected.Chunk1:X} to {expected.Chunk2:X}")
+                            $"Expected block {expected.Id:X3} " + (expected.Common
+                            ? "(part of primary set, shouldn't happen)"
+                            : $"while mapping chunk {expected.Chunk1:X2} to {expected.Chunk2:X2}")
+                            + $"\r\nAct 1 chunk: {index1:X2} | Act 1 block: {block1.Id:X3}"
+                            + $"\r\nAct 2 chunk: {index2:X2} | Act 2 block: {block2.Id:X3}"
                         );
 
                         errors = true;

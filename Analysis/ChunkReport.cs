@@ -19,8 +19,8 @@ namespace ChunkMergeTool.Analysis
                 .Where(match => match.chunk.MatchKind == MatchKind.Pending)
                 .Select(match => new List<string>
                 {
-                    match.index.ToString("X"),
-                    match.chunk.Match.ToString("X")
+                    match.index.ToString("X2"),
+                    match.chunk.Match.ToString("X2")
                 })];
             DuplicatesAct1 = CollectDuplicates(chunksAct1);
             DuplicatesAct2 = CollectDuplicates(chunksAct2);
@@ -50,7 +50,7 @@ namespace ChunkMergeTool.Analysis
                 .Select(group => group
                     .Select(chunk => chunk.index)
                     .Prepend(group.Key)
-                    .Select(index => index.ToString("X"))
+                    .Select(index => index.ToString("X2"))
                     .ToList())];
         }
     }
