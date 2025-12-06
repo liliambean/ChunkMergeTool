@@ -1,6 +1,6 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal static class TileInfo
+    internal static class TileData
     {
         public static List<IList<byte>> Load(string filename)
         {

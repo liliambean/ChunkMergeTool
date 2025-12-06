@@ -1,6 +1,6 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class LayoutInfo(List<LayoutRow> foreground, List<LayoutRow> background)
+    internal class LayoutData(List<LayoutRow> foreground, List<LayoutRow> background)
     {
         public List<LayoutRow> Foreground { get; set; } = foreground;
 
@@ -8,7 +8,7 @@
 
         public IEnumerable<LayoutRow> Rows => Foreground.Concat(Background);
 
-        public static LayoutInfo Load(string filename)
+        public static LayoutData Load(string filename)
         {
             var file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
             var widthFG = Utils.ReadWord(file);
@@ -26,7 +26,7 @@
 
             var foreground = LayoutRow.Load(file, widthFG, heightFG, ptrsFG);
             var background = LayoutRow.Load(file, widthBG, heightBG, ptrsBG);
-            return new LayoutInfo(foreground, background);
+            return new LayoutData(foreground, background);
         }
     }
 

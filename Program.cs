@@ -11,26 +11,26 @@ namespace ChunkMergeTool
 
         private static void Main()
         {
-            var layoutAct1 = LayoutInfo.Load(Utils.FileLayoutAct1);
-            var layoutAct2 = LayoutInfo.Load(Utils.FileLayoutAct2);
-            var chunksAct1 = ChunkInfo.Load(Utils.FileChunksAct1);
-            var chunksAct2 = ChunkInfo.Load(Utils.FileChunksAct2);
+            var layoutAct1 = LayoutData.Load(Utils.FileLayoutAct1);
+            var layoutAct2 = LayoutData.Load(Utils.FileLayoutAct2);
+            var chunksAct1 = ChunkData.Load(Utils.FileChunksAct1);
+            var chunksAct2 = ChunkData.Load(Utils.FileChunksAct2);
 
             chunksAct1[0xDA].Used = true; // Pasted into layout when miniboss starts
             chunksAct2[0xA6].Used = true; // Alt death egg booster pasted into layout during cutscene
             chunksAct2[0xA7].Used = true; // Alt death egg booster pasted into layout during cutscene
-            ChunkInfo.MarkUsedIfExistsInLayout(chunksAct1, layoutAct1);
-            ChunkInfo.MarkUsedIfExistsInLayout(chunksAct2, layoutAct2);
+            ChunkData.MarkUsedIfExistsInLayout(chunksAct1, layoutAct1);
+            ChunkData.MarkUsedIfExistsInLayout(chunksAct2, layoutAct2);
 
-            var blocksPrimary = BlockInfo.Load(Utils.FileBlocksPrimary);
-            var blocksAct1 = blocksPrimary.Concat(BlockInfo.Load(Utils.FileBlocksAct1)).ToList();
-            var blocksAct2 = blocksPrimary.Concat(BlockInfo.Load(Utils.FileBlocksAct2)).ToList();
-            BlockInfo.LoadCollisionIntoBlocks(Utils.FileCollisionAct1, blocksAct1);
-            BlockInfo.LoadCollisionIntoBlocks(Utils.FileCollisionAct2, blocksAct2);
+            var blocksPrimary = BlockData.Load(Utils.FileBlocksPrimary);
+            var blocksAct1 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct1)).ToList();
+            var blocksAct2 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct2)).ToList();
+            BlockData.LoadCollisionIntoBlocks(Utils.FileCollisionAct1, blocksAct1);
+            BlockData.LoadCollisionIntoBlocks(Utils.FileCollisionAct2, blocksAct2);
 
-            var tilesPrimary = TileInfo.Load(Utils.FileTilesPrimary);
-            var tilesAct1 = tilesPrimary.Concat(TileInfo.Load(Utils.FileTilesAct1)).ToList();
-            var tilesAct2 = tilesPrimary.Concat(TileInfo.Load(Utils.FileTilesAct2)).ToList();
+            var tilesPrimary = TileData.Load(Utils.FileTilesPrimary);
+            var tilesAct1 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct1)).ToList();
+            var tilesAct2 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct2)).ToList();
 
             MarkDuplicateChunks(chunksAct1);
             MarkDuplicateChunks(chunksAct2);
@@ -58,7 +58,7 @@ namespace ChunkMergeTool
             }
         }
 
-        private static void MarkDuplicateChunks(List<ChunkInfo> chunks)
+        private static void MarkDuplicateChunks(List<ChunkData> chunks)
         {
             for (var index1 = 0; index1 < chunks.Count; index1++)
             {
@@ -89,14 +89,14 @@ namespace ChunkMergeTool
             }
         }
 
-        private static void BlankUnusedChunks(List<ChunkInfo> chunks)
+        private static void BlankUnusedChunks(List<ChunkData> chunks)
         {
             var blankDefinition = chunks[0].Definition;
             foreach (var chunk in chunks.Where(chunk => !chunk.Used))
                 chunk.Definition = blankDefinition;
         }
 
-        private static List<BlockMapping?>? AnalyzeChunks(List<ChunkInfo> chunksAct1, List<ChunkInfo> chunksAct2, int blocksCommonCount)
+        private static List<BlockMapping?>? AnalyzeChunks(List<ChunkData> chunksAct1, List<ChunkData> chunksAct2, int blocksCommonCount)
         {
             var chunkIgnore = new Dictionary<int, List<int>?>();
             var chunkConfirm = new List<(int, int)>();
@@ -270,7 +270,7 @@ namespace ChunkMergeTool
             return blockConfirm;
         }
 
-        private static bool AnalyzeTiles(List<BlockConfirmMatch> blockConfirm, List<BlockInfo> blocksAct1, List<BlockInfo> blocksAct2, List<IList<byte>> tilesAct1, List<IList<byte>> tilesAct2)
+        private static bool AnalyzeTiles(List<BlockConfirmMatch> blockConfirm, List<BlockData> blocksAct1, List<BlockData> blocksAct2, List<IList<byte>> tilesAct1, List<IList<byte>> tilesAct2)
         {
             foreach (var match in blockConfirm)
             {

@@ -12,7 +12,7 @@ namespace ChunkMergeTool.Analysis
 
         public List<ChunkIgnoreMatch>? IgnoreMatches { get; set; }
 
-        public ChunkReport(List<ChunkInfo> chunksAct1, List<ChunkInfo> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
+        public ChunkReport(List<ChunkData> chunksAct1, List<ChunkData> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
         {
             ConfirmMatches = [.. chunksAct1
                 .Select((chunk, index) => (chunk, index))
@@ -40,7 +40,7 @@ namespace ChunkMergeTool.Analysis
         {
         }
 
-        private static List<List<string>> CollectDuplicates(List<ChunkInfo> chunks)
+        private static List<List<string>> CollectDuplicates(List<ChunkData> chunks)
         {
             return [.. chunks
                 .Select((chunk, index) => (chunk, index))
