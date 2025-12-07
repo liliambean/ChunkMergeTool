@@ -14,14 +14,15 @@ namespace ChunkMergeTool.Analysis
 
         public ChunkReport(List<ChunkData> chunksAct1, List<ChunkData> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
         {
-            ConfirmMatches = [.. chunksAct1
+            ConfirmMatches = chunksAct1
                 .Select((chunk, index) => (chunk, index))
                 .Where(match => match.chunk.MatchKind == MatchKind.Pending)
                 .Select(match => new List<string>
                 {
                     match.index.ToString("X2"),
                     match.chunk.Match.ToString("X2")
-                })];
+                })
+                .ToList();
             DuplicatesAct1 = CollectDuplicates(chunksAct1);
             DuplicatesAct2 = CollectDuplicates(chunksAct2);
             IgnoreMatches = [];
