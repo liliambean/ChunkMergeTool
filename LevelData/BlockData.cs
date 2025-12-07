@@ -36,7 +36,7 @@
         {
             FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
 
-            foreach (var block in blocks)
+            foreach (BlockData block in blocks)
                 block.Collision = Utils.ReadWord(file);
         }
     }
