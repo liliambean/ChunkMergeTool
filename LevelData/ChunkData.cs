@@ -4,9 +4,9 @@
     {
         public List<BlockRef> Definition { get; set; } = definition;
 
-        public bool Used { get; set; }
-
         public IEnumerable<int> Words => Definition.Select(blockRef => blockRef.Word);
+
+        public bool Used { get; set; }
 
         public static List<ChunkData> Load(string filename)
         {

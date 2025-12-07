@@ -4,6 +4,8 @@
     {
         public IList<byte> Bytes { get; set; } = bytes;
 
+        public bool Used { get; set; }
+
         public static List<TileData> Load(string filename)
         {
             string compressed = $"{filename}.bin";
@@ -21,6 +23,13 @@
             }
 
             return list;
+        }
+
+        public static void MarkUsed(List<TileData> tiles, List<BlockData> blocks)
+        {
+            foreach (BlockData block in blocks)
+                foreach (TileRef tile in block.Definition)
+                    tiles[tile.Id].Used = true;
         }
     }
 

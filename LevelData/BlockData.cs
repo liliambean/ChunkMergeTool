@@ -8,6 +8,8 @@
 
         public IEnumerable<int> Words => Definition.Select(tileRef => tileRef.Word);
 
+        public bool Used { get; set; }
+
         public static List<BlockData> Load(string filename)
         {
             string compressed = $"{filename}.bin";
@@ -32,8 +34,12 @@
             return list;
         }
 
-        public static void LoadCollisionIntoBlocks(string filename, List<BlockData> blocks)
+        public static void MarkUsedAndLoadCollision(List<BlockData> blocks, List<ChunkData> chunks, string filename)
         {
+            foreach (ChunkData chunk in chunks)
+                foreach (BlockRef block in chunk.Definition)
+                    blocks[block.Id].Used = true;
+
             FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
 
             foreach (BlockData block in blocks)

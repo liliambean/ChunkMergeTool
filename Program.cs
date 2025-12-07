@@ -21,12 +21,14 @@ namespace ChunkMergeTool
             List<BlockData> blocksPrimary = BlockData.Load(Utils.FileBlocksPrimary);
             List<BlockData> blocksAct1 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct1)).ToList();
             List<BlockData> blocksAct2 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct2)).ToList();
-            BlockData.LoadCollisionIntoBlocks(Utils.FileCollisionAct1, blocksAct1);
-            BlockData.LoadCollisionIntoBlocks(Utils.FileCollisionAct2, blocksAct2);
+            BlockData.MarkUsedAndLoadCollision(blocksAct1, chunksAct1, Utils.FileCollisionAct1);
+            BlockData.MarkUsedAndLoadCollision(blocksAct2, chunksAct2, Utils.FileCollisionAct2);
 
             List<TileData> tilesPrimary = TileData.Load(Utils.FileTilesPrimary);
             List<TileData> tilesAct1 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct1)).ToList();
             List<TileData> tilesAct2 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct2)).ToList();
+            TileData.MarkUsed(tilesAct1, blocksAct1);
+            TileData.MarkUsed(tilesAct2, blocksAct2);
 
             List<ChunkDataEx> chunksEx1 = ReportUtils.MarkDuplicateChunks(chunksAct1);
             List<ChunkDataEx> chunksEx2 = ReportUtils.MarkDuplicateChunks(chunksAct2);
