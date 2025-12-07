@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# IDE0008: Use var instead of explicit type
+dotnet_diagnostic.IDE0008.severity = error
+
+# IDE0305: Simplify collection initialization
+dotnet_diagnostic.IDE0305.severity = none

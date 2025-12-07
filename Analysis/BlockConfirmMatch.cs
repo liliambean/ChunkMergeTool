@@ -24,7 +24,7 @@ namespace ChunkMergeTool.Analysis
         public int Block2 { get; set; }
 
         [JsonIgnore]
-        public BlockMapping? Mapping { get; set; }
+        public BlockMapping Mapping { get; set; }
 
         [JsonIgnore]
         public MatchKind MatchKind { get; set; }
@@ -41,9 +41,11 @@ namespace ChunkMergeTool.Analysis
             MatchKind = MatchKind.Pending;
         }
 
+#pragma warning disable CS8618
         public BlockConfirmMatch()
         {
         }
+#pragma warning restore CS8618
     }
 
 }

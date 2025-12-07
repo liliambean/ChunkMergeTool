@@ -31,7 +31,7 @@ namespace ChunkMergeTool.LevelData
 
         public static void ProcessKosFile(string source, string destination, bool moduled, bool extract)
         {
-            var args = new StringBuilder();
+            StringBuilder args = new();
 
             if (extract) { args.Append("-x "); }
             if (moduled) { args.Append("-m "); }
@@ -42,13 +42,13 @@ namespace ChunkMergeTool.LevelData
             args.Append(destination);
             args.Append('"');
 
-            var process = Process.Start(new ProcessStartInfo("koscmp.exe", args.ToString())
+            Process process = Process.Start(new ProcessStartInfo("koscmp.exe", args.ToString())
             {
                 WorkingDirectory = WorkingDir,
                 CreateNoWindow = true,
-            });
+            })!;
 
-            process!.WaitForExit();
+            process.WaitForExit();
         }
     }
 

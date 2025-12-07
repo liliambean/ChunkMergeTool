@@ -18,19 +18,19 @@ namespace ChunkMergeTool.LevelData
 
         public static List<ChunkData> Load(string filename)
         {
-            var compressed = $"{filename}.bin";
-            var uncompressed = $"{filename} unc.bin";
+            string compressed = $"{filename}.bin";
+            string uncompressed = $"{filename} unc.bin";
             Utils.ProcessKosFile(compressed, uncompressed, moduled: false, extract: true);
 
-            var file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
-            var list = new List<ChunkData>();
+            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
+            List<ChunkData> list = [];
 
             while (file.Position != file.Length)
             {
-                var definition = new List<BlockRef>(0x40);
-                for (var index = 0; index < 0x40; index++)
+                List<BlockRef> definition = new(0x40);
+                for (int index = 0; index < 0x40; index++)
                 {
-                    var word = Utils.ReadWord(file);
+                    int word = Utils.ReadWord(file);
                     definition.Add(new BlockRef(word));
                 }
 
@@ -42,8 +42,8 @@ namespace ChunkMergeTool.LevelData
 
         public static void MarkUsedIfExistsInLayout(List<ChunkData> chunks, LayoutData layout)
         {
-            foreach (var row in layout.Rows)
-                foreach (var chunk in row.Chunks)
+            foreach (LayoutRow row in layout.Rows)
+                foreach (byte chunk in row.Chunks)
                     chunks[chunk].Used = true;
         }
     }

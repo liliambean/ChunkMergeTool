@@ -10,22 +10,22 @@
 
         public static LayoutData Load(string filename)
         {
-            var file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
-            var widthFG = Utils.ReadWord(file);
-            var widthBG = Utils.ReadWord(file);
-            var heightFG = Utils.ReadWord(file);
-            var heightBG = Utils.ReadWord(file);
-            var ptrsFG = new List<int>(0x20);
-            var ptrsBG = new List<int>(0x20);
+            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
+            int widthFG = Utils.ReadWord(file);
+            int widthBG = Utils.ReadWord(file);
+            int heightFG = Utils.ReadWord(file);
+            int heightBG = Utils.ReadWord(file);
+            List<int> ptrsFG = new(0x20);
+            List<int> ptrsBG = new(0x20);
 
-            for (var index = 0; index < 0x20; index++)
+            for (int index = 0; index < 0x20; index++)
             {
                 ptrsFG.Add(Utils.ReadWord(file));
                 ptrsBG.Add(Utils.ReadWord(file));
             }
 
-            var foreground = LayoutRow.Load(file, widthFG, heightFG, ptrsFG);
-            var background = LayoutRow.Load(file, widthBG, heightBG, ptrsBG);
+            List<LayoutRow> foreground = LayoutRow.Load(file, widthFG, heightFG, ptrsFG);
+            List<LayoutRow> background = LayoutRow.Load(file, widthBG, heightBG, ptrsBG);
             return new LayoutData(foreground, background);
         }
     }
@@ -36,14 +36,14 @@
 
         public static List<LayoutRow> Load(FileStream file, int bufferSize, int rowCount, IEnumerable<int> rowPtrs)
         {
-            var rows = new List<LayoutRow>(rowCount);
+            List<LayoutRow> rows = new(rowCount);
 
-            foreach (var ptr in rowPtrs)
+            foreach (int ptr in rowPtrs)
             {
                 if (rows.Count == rowCount)
                     break;
 
-                var buffer = new byte[bufferSize];
+                byte[] buffer = new byte[bufferSize];
                 file.Seek(ptr - 0x8000, SeekOrigin.Begin);
                 file.ReadExactly(buffer);
                 rows.Add(new LayoutRow(buffer));

@@ -4,13 +4,13 @@ namespace ChunkMergeTool.Analysis
 {
     internal class ChunkReport
     {
-        public List<List<string>>? ConfirmMatches { get; set; }
+        public List<List<string>> ConfirmMatches { get; set; }
 
-        public List<List<string>>? DuplicatesAct1 { get; set; }
+        public List<List<string>> DuplicatesAct1 { get; set; }
 
-        public List<List<string>>? DuplicatesAct2 { get; set; }
+        public List<List<string>> DuplicatesAct2 { get; set; }
 
-        public List<ChunkIgnoreMatch>? IgnoreMatches { get; set; }
+        public List<ChunkIgnoreMatch> IgnoreMatches { get; set; }
 
         public ChunkReport(List<ChunkData> chunksAct1, List<ChunkData> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
         {
@@ -30,20 +30,22 @@ namespace ChunkMergeTool.Analysis
             if (chunkIgnore.Count == 0)
                 IgnoreMatches.Add(new ChunkIgnoreMatch(0, [0]));
 
-            else foreach (var index1 in chunkIgnore.Keys)
-                {
-                    var ignore = chunkIgnore[index1];
-                    IgnoreMatches.Add(new ChunkIgnoreMatch(index1, ignore));
-                }
+            else foreach (int index1 in chunkIgnore.Keys)
+            {
+                List<int>? ignore = chunkIgnore[index1];
+                IgnoreMatches.Add(new ChunkIgnoreMatch(index1, ignore));
+            }
         }
 
+#pragma warning disable CS8618
         public ChunkReport()
         {
         }
+#pragma warning restore CS8618
 
         private static List<List<string>> CollectDuplicates(List<ChunkData> chunks)
         {
-            return [.. chunks
+            return chunks
                 .Select((chunk, index) => (chunk, index))
                 .Where(match => match.chunk.MatchKind == MatchKind.Duplicate)
                 .GroupBy(match => match.chunk.Match)
@@ -52,7 +54,8 @@ namespace ChunkMergeTool.Analysis
                     .Select(chunk => chunk.index)
                     .Prepend(group.Key)
                     .Select(index => index.ToString("X2"))
-                    .ToList())];
+                    .ToList())
+                .ToList();
         }
     }
 

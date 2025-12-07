@@ -6,16 +6,16 @@
 
         public static List<TileData> Load(string filename)
         {
-            var compressed = $"{filename}.bin";
-            var uncompressed = $"{filename} unc.bin";
+            string compressed = $"{filename}.bin";
+            string uncompressed = $"{filename} unc.bin";
             Utils.ProcessKosFile(compressed, uncompressed, moduled: true, extract: true);
 
-            var file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
-            var list = new List<TileData>();
+            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
+            List<TileData> list = [];
 
             while (file.Position != file.Length)
             {
-                var bytes = new byte[0x20];
+                byte[] bytes = new byte[0x20];
                 file.ReadExactly(bytes);
                 list.Add(new TileData(bytes));
             }

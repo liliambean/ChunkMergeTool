@@ -10,19 +10,19 @@
 
         public static List<BlockData> Load(string filename)
         {
-            var compressed = $"{filename}.bin";
-            var uncompressed = $"{filename} unc.bin";
+            string compressed = $"{filename}.bin";
+            string uncompressed = $"{filename} unc.bin";
             Utils.ProcessKosFile(compressed, uncompressed, moduled: false, extract: true);
 
-            var file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
-            var list = new List<BlockData>();
+            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
+            List<BlockData> list = [];
 
             while (file.Position != file.Length)
             {
-                var definition = new List<TileRef>(4);
-                for (var index = 0; index < 4; index++)
+                List<TileRef> definition = new(4);
+                for (int index = 0; index < 4; index++)
                 {
-                    var word = Utils.ReadWord(file);
+                    int word = Utils.ReadWord(file);
                     definition.Add(new TileRef(word));
                 }
 
@@ -34,7 +34,7 @@
 
         public static void LoadCollisionIntoBlocks(string filename, List<BlockData> blocks)
         {
-            var file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
+            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
 
             foreach (var block in blocks)
                 block.Collision = Utils.ReadWord(file);
