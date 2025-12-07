@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.Json.Serialization;
 
-namespace ChunkMergeTool.Analysis
+namespace ChunkMergeTool.Reports
 {
     internal class BlockConfirmMatch
     {

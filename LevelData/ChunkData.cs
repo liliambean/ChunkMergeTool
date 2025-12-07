@@ -1,4 +1,4 @@
-﻿using ChunkMergeTool.Analysis;
+﻿using ChunkMergeTool.Reports;
 
 namespace ChunkMergeTool.LevelData
 {
