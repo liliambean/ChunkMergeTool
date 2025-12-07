@@ -32,11 +32,14 @@
             return list;
         }
 
-        public static void MarkUsed(List<ChunkData> chunks, LayoutData layout)
+        public static void MarkUsed(LayoutData layout, List<ChunkData> chunks, List<int> usedIds)
         {
             foreach (LayoutRow row in layout.Rows)
                 foreach (byte chunk in row.Chunks)
                     chunks[chunk].Used = true;
+
+            foreach (int chunk in usedIds)
+                chunks[chunk].Used = true;
         }
     }
 

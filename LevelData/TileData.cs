@@ -4,6 +4,8 @@
     {
         public IList<byte> Bytes { get; set; } = bytes;
 
+        public bool Pinned { get; set; }
+
         public bool Used { get; set; }
 
         public static List<TileData> Load(string filename)
@@ -25,11 +27,15 @@
             return list;
         }
 
-        public static void MarkUsed(List<TileData> tiles, List<BlockData> blocks)
+        public static void MarkUsedAndPinned(List<BlockData> blocks, List<TileData> tiles, List<(int, int)> pinnedIds)
         {
             foreach (BlockData block in blocks)
                 foreach (TileRef tile in block.Definition)
                     tiles[tile.Id].Used = true;
+
+            foreach ((int start, int end) in pinnedIds)
+                for (int id = start; id <= end; id++)
+                    tiles[id].Pinned = true;
         }
     }
 

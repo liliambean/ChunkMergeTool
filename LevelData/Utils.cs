@@ -24,6 +24,25 @@ namespace ChunkMergeTool.LevelData
         public static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
         public static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
 
+        public static readonly List<int> EventChunkIDsAct1 = [
+            0xDA, // Empty box pasted into layout when miniboss starts
+        ];
+
+        public static readonly List<int> EventChunkIDsAct2 = [
+            0xA6, // Alt death egg booster pasted into layout during cutscene
+            0xA7, // Alt death egg booster pasted into layout during cutscene
+        ];
+
+        public static readonly List<(int, int)> AnimatedTileIDsAct1 = [
+            (0x160, 0x178),
+            (0x350, 0x36C),
+        ];
+
+        public static readonly List<(int, int)> AnimatedTileIDsAct2 = [
+            (0x160, 0x178),
+            (0x2C3, 0x2E4),
+        ];
+
         public static int ReadWord(FileStream file)
         {
             return (file.ReadByte() << 8) | file.ReadByte();

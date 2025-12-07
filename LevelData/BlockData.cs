@@ -34,7 +34,7 @@
             return list;
         }
 
-        public static void MarkUsedAndLoadCollision(List<BlockData> blocks, List<ChunkData> chunks, string filename)
+        public static void MarkUsedAndLoadCollision(List<ChunkData> chunks, List<BlockData> blocks, string filename)
         {
             foreach (ChunkData chunk in chunks)
                 foreach (BlockRef block in chunk.Definition)
