@@ -93,7 +93,7 @@ namespace ChunkMergeTool.Reports
             return blockConfirm;
         }
 
-        public static List<BlockMapping?>? AnalyzeChunks(List<ChunkData> chunksAct1, List<ChunkData> chunksAct2, int blocksCommonCount)
+        public static List<BlockMapping?>? AnalyzeChunks(List<ChunkDataEx> chunksAct1, List<ChunkDataEx> chunksAct2, int blocksCommonCount)
         {
             Dictionary<int, List<int>?> chunkIgnore = [];
             List<(int, int)> chunkConfirm = [];
@@ -130,7 +130,7 @@ namespace ChunkMergeTool.Reports
                 if (chunkIgnore.TryGetValue(index1, out List<int>? ignore) && ignore == null)
                     continue;
 
-                ChunkData chunk1 = chunksAct1[index1];
+                ChunkDataEx chunk1 = chunksAct1[index1];
                 if (!chunk1.Used || chunk1.MatchKind != MatchKind.Unique) continue;
 
                 for (int index2 = 1; index2 < chunksAct2.Count; index2++)
@@ -138,7 +138,7 @@ namespace ChunkMergeTool.Reports
                     if (ignore != null && ignore.Contains(index2))
                         continue;
 
-                    ChunkData chunk2 = chunksAct2[index2];
+                    ChunkDataEx chunk2 = chunksAct2[index2];
                     if (!chunk2.Used) continue;
 
                     Dictionary<int, int> guessedMappings = [];
@@ -224,17 +224,18 @@ namespace ChunkMergeTool.Reports
             return blockMappings;
         }
 
-        public static void MarkDuplicateChunks(List<ChunkData> chunks)
+        public static List<ChunkDataEx> MarkDuplicateChunks(List<ChunkData> chunkData)
         {
+            List<ChunkDataEx> chunks = chunkData.Select(chunk => new ChunkDataEx(chunk.Definition)).ToList();
             for (int index1 = 0; index1 < chunks.Count; index1++)
             {
-                ChunkData chunk1 = chunks[index1];
+                ChunkDataEx chunk1 = chunks[index1];
                 if (chunk1.MatchKind == MatchKind.Duplicate) continue;
 
                 for (int index2 = 0; index2 < chunks.Count; index2++)
                 {
                     if (index1 == index2) continue;
-                    ChunkData chunk2 = chunks[index2];
+                    ChunkDataEx chunk2 = chunks[index2];
                     bool match = true;
 
                     for (int blockIndex = 0; blockIndex < 0x40; blockIndex++)
@@ -253,18 +254,20 @@ namespace ChunkMergeTool.Reports
                     }
                 }
             }
+
+            return chunks;
         }
 
-        public static void BlankUnusedChunks(List<ChunkData> chunks)
+        public static void BlankUnusedChunks(List<ChunkDataEx> chunks)
         {
             List<BlockRef> blankDefinition = chunks[0].Definition;
-            foreach (ChunkData chunk in chunks.Where(chunk => !chunk.Used))
+            foreach (ChunkDataEx chunk in chunks.Where(chunk => !chunk.Used))
                 chunk.Definition = blankDefinition;
         }
 
-        public static List<List<string>> GetChunkMatches(List<ChunkData> chunksAct1)
+        public static List<List<string>> GetChunkMatches(List<ChunkDataEx> chunks)
         {
-            return chunksAct1
+            return chunks
                 .Select((chunk, index) => (chunk, index))
                 .Where(match => match.chunk.MatchKind == MatchKind.Pending)
                 .Select(match => new List<string>
@@ -276,7 +279,7 @@ namespace ChunkMergeTool.Reports
         }
 
 
-        public static List<List<string>> GetChunkDuplicates(List<ChunkData> chunks)
+        public static List<List<string>> GetChunkDuplicates(List<ChunkDataEx> chunks)
         {
             return chunks
                 .Select((chunk, index) => (chunk, index))

@@ -1,18 +1,10 @@
-﻿using ChunkMergeTool.Reports;
-
-namespace ChunkMergeTool.LevelData
+﻿namespace ChunkMergeTool.LevelData
 {
     internal class ChunkData(List<BlockRef> definition)
     {
         public List<BlockRef> Definition { get; set; } = definition;
 
         public bool Used { get; set; }
-
-        public MatchKind MatchKind { get; set; }
-
-        public byte Match { get; set; }
-
-        public bool Confirmed { get; set; }
 
         public IEnumerable<int> Words => Definition.Select(blockRef => blockRef.Word);
 
@@ -40,7 +32,7 @@ namespace ChunkMergeTool.LevelData
             return list;
         }
 
-        public static void MarkUsedIfExistsInLayout(List<ChunkData> chunks, LayoutData layout)
+        public static void MarkUsed(List<ChunkData> chunks, LayoutData layout)
         {
             foreach (LayoutRow row in layout.Rows)
                 foreach (byte chunk in row.Chunks)

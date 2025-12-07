@@ -12,7 +12,7 @@ namespace ChunkMergeTool.Reports
 
         public List<ChunkIgnoreMatch> IgnoreMatches { get; set; }
 
-        public ChunkReport(List<ChunkData> chunksAct1, List<ChunkData> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
+        public ChunkReport(List<ChunkDataEx> chunksAct1, List<ChunkDataEx> chunksAct2, Dictionary<int, List<int>?> chunkIgnore)
         {
             ConfirmMatches = ReportUtils.GetChunkMatches(chunksAct1);
             DuplicatesAct1 = ReportUtils.GetChunkDuplicates(chunksAct1);
