@@ -17,34 +17,34 @@ namespace ChunkMergeTool.Reports
 
                 if (!match.XFlip && !match.YFlip)
                 {
-                    if (!Utils.CompareTiles(block1.Definition[0], block2.Definition[0], tilesAct1, tilesAct2, false, false) ||
-                        !Utils.CompareTiles(block1.Definition[1], block2.Definition[1], tilesAct1, tilesAct2, false, false) ||
-                        !Utils.CompareTiles(block1.Definition[2], block2.Definition[2], tilesAct1, tilesAct2, false, false) ||
-                        !Utils.CompareTiles(block1.Definition[3], block2.Definition[3], tilesAct1, tilesAct2, false, false))
+                    if (!CompareTiles(block1.Definition[0], block2.Definition[0], tilesAct1, tilesAct2, false, false) ||
+                        !CompareTiles(block1.Definition[1], block2.Definition[1], tilesAct1, tilesAct2, false, false) ||
+                        !CompareTiles(block1.Definition[2], block2.Definition[2], tilesAct1, tilesAct2, false, false) ||
+                        !CompareTiles(block1.Definition[3], block2.Definition[3], tilesAct1, tilesAct2, false, false))
                         return false;
                 }
                 else if (match.XFlip && !match.YFlip)
                 {
-                    if (!Utils.CompareTiles(block1.Definition[0], block2.Definition[1], tilesAct1, tilesAct2, true, false) ||
-                        !Utils.CompareTiles(block1.Definition[1], block2.Definition[0], tilesAct1, tilesAct2, true, false) ||
-                        !Utils.CompareTiles(block1.Definition[2], block2.Definition[3], tilesAct1, tilesAct2, true, false) ||
-                        !Utils.CompareTiles(block1.Definition[3], block2.Definition[2], tilesAct1, tilesAct2, true, false))
+                    if (!CompareTiles(block1.Definition[0], block2.Definition[1], tilesAct1, tilesAct2, true, false) ||
+                        !CompareTiles(block1.Definition[1], block2.Definition[0], tilesAct1, tilesAct2, true, false) ||
+                        !CompareTiles(block1.Definition[2], block2.Definition[3], tilesAct1, tilesAct2, true, false) ||
+                        !CompareTiles(block1.Definition[3], block2.Definition[2], tilesAct1, tilesAct2, true, false))
                         return false;
                 }
                 else if (!match.XFlip && match.YFlip)
                 {
-                    if (!Utils.CompareTiles(block1.Definition[0], block2.Definition[2], tilesAct1, tilesAct2, false, true) ||
-                        !Utils.CompareTiles(block1.Definition[1], block2.Definition[3], tilesAct1, tilesAct2, false, true) ||
-                        !Utils.CompareTiles(block1.Definition[2], block2.Definition[0], tilesAct1, tilesAct2, false, true) ||
-                        !Utils.CompareTiles(block1.Definition[3], block2.Definition[1], tilesAct1, tilesAct2, false, true))
+                    if (!CompareTiles(block1.Definition[0], block2.Definition[2], tilesAct1, tilesAct2, false, true) ||
+                        !CompareTiles(block1.Definition[1], block2.Definition[3], tilesAct1, tilesAct2, false, true) ||
+                        !CompareTiles(block1.Definition[2], block2.Definition[0], tilesAct1, tilesAct2, false, true) ||
+                        !CompareTiles(block1.Definition[3], block2.Definition[1], tilesAct1, tilesAct2, false, true))
                         return false;
                 }
                 else
                 {
-                    if (!Utils.CompareTiles(block1.Definition[0], block2.Definition[3], tilesAct1, tilesAct2, true, true) ||
-                        !Utils.CompareTiles(block1.Definition[1], block2.Definition[2], tilesAct1, tilesAct2, true, true) ||
-                        !Utils.CompareTiles(block1.Definition[2], block2.Definition[1], tilesAct1, tilesAct2, true, true) ||
-                        !Utils.CompareTiles(block1.Definition[3], block2.Definition[0], tilesAct1, tilesAct2, true, true))
+                    if (!CompareTiles(block1.Definition[0], block2.Definition[3], tilesAct1, tilesAct2, true, true) ||
+                        !CompareTiles(block1.Definition[1], block2.Definition[2], tilesAct1, tilesAct2, true, true) ||
+                        !CompareTiles(block1.Definition[2], block2.Definition[1], tilesAct1, tilesAct2, true, true) ||
+                        !CompareTiles(block1.Definition[3], block2.Definition[0], tilesAct1, tilesAct2, true, true))
                         return false;
                 }
             }
@@ -308,6 +308,14 @@ namespace ChunkMergeTool.Reports
             }
 
             return ignoreMatches;
+        }
+
+        private static bool CompareTiles(TileRef tileRef1, TileRef tileRef2, List<TileData> tilesAct1, List<TileData> tilesAct2, bool xFlip, bool yFlip)
+        {
+            bool effectiveXFlip = xFlip ^ tileRef1.XFlip ^ tileRef2.XFlip;
+            bool effectiveYFlip = yFlip ^ tileRef1.YFlip ^ tileRef2.YFlip;
+
+            return tilesAct1[tileRef1.Id].Equals(tilesAct2[tileRef2.Id], effectiveXFlip, effectiveYFlip);
         }
     }
 

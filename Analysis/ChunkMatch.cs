@@ -2,9 +2,11 @@
 
 namespace ChunkMergeTool.Analysis
 {
-    internal class ChunkMatch(ChunkData chunk)
+    internal class ChunkMatch(ChunkData chunk) : IMatch<ChunkData>
     {
-        public ChunkData Chunk { get; set; } = chunk;
+        public ChunkData Data { get; set; } = chunk;
+
+        public bool Primary { get; set; }
 
         public static Dictionary<int, ChunkMatch> FindMatches(List<ChunkData> chunks, Dictionary<int, BlockMatch> blocks)
         {
@@ -13,7 +15,7 @@ namespace ChunkMergeTool.Analysis
             return matches;
         }
 
-        public static void Merge(Dictionary<int, ChunkMatch> chunks1, Dictionary<int, ChunkMatch> chunks2)
+        public static void MarkPrimary(Dictionary<int, ChunkMatch> matches1, Dictionary<int, ChunkMatch> matches2)
         {
         }
     }

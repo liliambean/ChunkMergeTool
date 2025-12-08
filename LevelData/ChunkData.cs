@@ -1,12 +1,14 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class ChunkData(List<BlockRef> definition)
+    internal class ChunkData(List<BlockRef> definition): IData
     {
         public List<BlockRef> Definition { get; set; } = definition;
 
-        public IEnumerable<int> Words => Definition.Select(blockRef => blockRef.Word);
+        public bool Primary { get; set; }
 
         public bool Used { get; set; }
+
+        public IEnumerable<int> Words => Definition.Select(blockRef => blockRef.Word);
 
         public static List<ChunkData> Load(string filename)
         {

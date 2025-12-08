@@ -2,13 +2,15 @@
 
 namespace ChunkMergeTool.Analysis
 {
-    internal class BlockMatch(BlockData block, bool xFlip, bool yFlip)
+    internal class BlockMatch(BlockData block, bool xFlip, bool yFlip) : IMatch<BlockData>
     {
-        public BlockData Block { get; set; } = block;
+        public BlockData Data { get; set; } = block;
 
         public bool XFlip { get; set; } = xFlip;
 
         public bool YFlip { get; set; } = yFlip;
+
+        public bool Primary { get; set; }
 
         public static Dictionary<int, BlockMatch> FindMatches(List<BlockData> blocks, Dictionary<int, TileMatch> tiles)
         {
@@ -17,7 +19,7 @@ namespace ChunkMergeTool.Analysis
             return matches;
         }
 
-        public static void Merge(Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2)
+        public static void MarkPrimary(Dictionary<int, BlockMatch> matches1, Dictionary<int, BlockMatch> matches2)
         {
         }
     }

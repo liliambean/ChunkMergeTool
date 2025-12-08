@@ -1,14 +1,16 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class BlockData(List<TileRef> definition)
+    internal class BlockData(List<TileRef> definition) : IData
     {
         public List<TileRef> Definition { get; set; } = definition;
 
         public int Collision { get; set; }
 
-        public IEnumerable<int> Words => Definition.Select(tileRef => tileRef.Word);
+        public bool Primary { get; set; }
 
         public bool Used { get; set; }
+
+        public IEnumerable<int> Words => Definition.Select(tileRef => tileRef.Word);
 
         public static List<BlockData> Load(string filename)
         {

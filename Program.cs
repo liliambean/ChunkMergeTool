@@ -28,19 +28,36 @@ namespace ChunkMergeTool
             TileData.MarkUsedAndPinned(blocksAct1, tilesAct1, Utils.AnimatedTileIDsAct1);
             TileData.MarkUsedAndPinned(blocksAct2, tilesAct2, Utils.AnimatedTileIDsAct2);
 
+
             Dictionary<int, TileMatch> tileMatchesAct1 = TileMatch.FindMatches(tilesAct1);
             Dictionary<int, TileMatch> tileMatchesAct2 = TileMatch.FindMatches(tilesAct2);
-            TileMatch.Merge(tileMatchesAct1, tileMatchesAct2);
+            TileMatch.MarkPrimary(tileMatchesAct1, tileMatchesAct2);
 
             Dictionary<int, BlockMatch> blockMatchesAct1 = BlockMatch.FindMatches(blocksAct1, tileMatchesAct1);
             Dictionary<int, BlockMatch> blockMatchesAct2 = BlockMatch.FindMatches(blocksAct2, tileMatchesAct2);
-            BlockMatch.Merge(blockMatchesAct1, blockMatchesAct2);
+            BlockMatch.MarkPrimary(blockMatchesAct1, blockMatchesAct2);
 
             Dictionary<int, ChunkMatch> chunkMatchesAct1 = ChunkMatch.FindMatches(chunksAct1, blockMatchesAct1);
             Dictionary<int, ChunkMatch> chunkMatchesAct2 = ChunkMatch.FindMatches(chunksAct2, blockMatchesAct2);
-            ChunkMatch.Merge(chunkMatchesAct1, chunkMatchesAct2);
+            ChunkMatch.MarkPrimary(chunkMatchesAct1, chunkMatchesAct2);
+
+            // TODOs
+            // Process block data
+            // Ensure duplicate tiles for block collision purposes
+            // Ensure pinned tiles
+            // Process chunk data
+
+            (List<TileData> Primary, List<TileData> Act1, List<TileData> Act2) Tiles
+                = Utils.GenerateLists<TileMatch, TileData>(tileMatchesAct1, tileMatchesAct2);
+
+            (List<BlockData> Primary, List<BlockData> Act1, List<BlockData> Act2) Blocks
+                = Utils.GenerateLists<BlockMatch, BlockData>(blockMatchesAct1, blockMatchesAct2);
+
+            (List<ChunkData> Primary, List<ChunkData> Act1, List<ChunkData> Act2) Chunks
+                = Utils.GenerateLists<ChunkMatch, ChunkData>(chunkMatchesAct1, chunkMatchesAct2);
 
 
+            return;
 
             List<ChunkDataEx> chunksEx1 = ReportUtils.MarkDuplicateChunks(chunksAct1);
             List<ChunkDataEx> chunksEx2 = ReportUtils.MarkDuplicateChunks(chunksAct2);
