@@ -17,6 +17,7 @@ namespace ChunkMergeTool
         public static readonly string FileCollisionAct1 = @"..\Collision\1.bin";
         public static readonly string FileCollisionAct2 = @"..\Collision\2.bin";
 
+        public static readonly string FileChunksPrimary = @"Primary";
         public static readonly string FileChunksAct1 = @"Act 1";
         public static readonly string FileChunksAct2 = @"Act 2";
         public static readonly string FileBlocksPrimary = @"..\Blocks\Primary";
@@ -26,8 +27,8 @@ namespace ChunkMergeTool
         public static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
         public static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
 
-        public static readonly List<int> EventChunkIDsAct1 = [0xDA];
-        public static readonly List<int> EventChunkIDsAct2 = [0xA6, 0xA7];
+        public static readonly List<byte> EventChunkIDsAct1 = [0xDA];
+        public static readonly List<byte> EventChunkIDsAct2 = [0xA6, 0xA7];
         public static readonly List<Range> PinnedTilesPrimary = [new(0, 0x48), new(0x160, 0x178)];
         public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
         public static readonly Range PinnedTilesAct2 = new(0x2C3, 0x2E4);
@@ -214,6 +215,13 @@ namespace ChunkMergeTool
         {
             foreach (TMatch match in matches.Values)
                 match.Id = data.IndexOf(match.Data);
+        }
+
+        public static void UpdateChunkRefs(LayoutData layout, Dictionary<int, ChunkMatch> matches)
+        {
+            foreach (List<byte> layoutRow in layout.Rows)
+                for (int index = 0; index < layoutRow.Count; index++)
+                    layoutRow[index] = (byte)matches[layoutRow[index]].Id;
         }
 
         public static void ProcessKosFile(string source, string destination, bool moduled, bool extract)

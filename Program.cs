@@ -71,6 +71,16 @@ namespace ChunkMergeTool
             ChunkMatch.UpdateBlockRefs(Chunks.Primary, blockMatchesAct1);
             ChunkMatch.UpdateBlockRefs(Chunks.Act1, blockMatchesAct1);
             ChunkMatch.UpdateBlockRefs(Chunks.Act2, blockMatchesAct2);
+
+            Utils.EnsureIds(new List<ChunkData>([..Chunks.Primary, ..Chunks.Act1]), chunkMatchesAct1);
+            Utils.EnsureIds(new List<ChunkData>([..Chunks.Primary, ..Chunks.Act2]), chunkMatchesAct2);
+
+
+
+            Utils.UpdateChunkRefs(layoutAct1, chunkMatchesAct1);
+            Utils.UpdateChunkRefs(layoutAct2, chunkMatchesAct2);
+
+            return;
         }
     }
 
