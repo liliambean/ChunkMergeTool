@@ -18,5 +18,9 @@ namespace ChunkMergeTool.Analysis
         public static void MarkPrimary(Dictionary<int, ChunkMatch> matches1, Dictionary<int, ChunkMatch> matches2)
         {
         }
+
+        public static void UpdateBlockRefs(List<ChunkData> chunks, Dictionary<int, ChunkMatch> matches)
+        {
+        }
     }
 }

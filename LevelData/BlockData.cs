@@ -4,11 +4,11 @@
     {
         public List<TileRef> Definition { get; set; } = definition;
 
-        public int Collision { get; set; }
-
         public bool Primary { get; set; }
 
         public bool Used { get; set; }
+
+        public int Collision { get; set; }
 
         public IEnumerable<int> Words => Definition.Select(tileRef => tileRef.Word);
 

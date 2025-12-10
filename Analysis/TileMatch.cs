@@ -44,6 +44,7 @@ namespace ChunkMergeTool.Analysis
                         (xFlip, yFlip) =>
                         {
                             matchesForTile1.Add(new TileMatch(tile2, xFlip, yFlip));
+                            if (tile2.Pinned != PinnedKind.None) return;
                             matches[index2].Add(new TileMatch(tile1, xFlip, yFlip));
                         });
                 }
@@ -59,19 +60,19 @@ namespace ChunkMergeTool.Analysis
             List<TileData> act1 = Utils.CreateShortlist<TileMatch, TileData>(matches1);
             List<TileData> act2 = Utils.CreateShortlist<TileMatch, TileData>(matches2);
 
-            foreach (TileData tile1 in act1)
+            foreach (TileData tile1 in act1.Where(tile => tile.Pinned != PinnedKind.Act))
             {
-                foreach (TileData tile2 in act2)
+                foreach (TileData tile2 in act2.Where(tile => tile.Pinned != PinnedKind.Act))
                     Utils.ForEachFlipWhere(
                         (xFlip, yFlip) => tile1.Equals(tile2, xFlip, yFlip),
                         (xFlip, yFlip) =>
                         {
                             foreach (TileMatch tile in matches2.Values.Where(tile => tile.Data == tile2))
                             {
-                                tile.Data.Used = false;
-                                tile.Data = tile1;
                                 tile.XFlip ^= xFlip;
                                 tile.YFlip ^= yFlip;
+                                tile.Data = tile1;
+                                tile.Data.Used = false;
                             }
 
                             tile1.Primary = true;

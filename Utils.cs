@@ -26,24 +26,11 @@ namespace ChunkMergeTool
         public static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
         public static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
 
-        public static readonly List<int> EventChunkIDsAct1 = [
-            0xDA, // Empty box pasted into layout when miniboss starts
-        ];
-
-        public static readonly List<int> EventChunkIDsAct2 = [
-            0xA6, // Alt death egg booster pasted into layout during cutscene
-            0xA7, // Alt death egg booster pasted into layout during cutscene
-        ];
-
-        public static readonly List<(int, int)> AnimatedTileIDsAct1 = [
-            (0x160, 0x178),
-            (0x350, 0x36C),
-        ];
-
-        public static readonly List<(int, int)> AnimatedTileIDsAct2 = [
-            (0x160, 0x178),
-            (0x2C3, 0x2E4),
-        ];
+        public static readonly List<int> EventChunkIDsAct1 = [0xDA];
+        public static readonly List<int> EventChunkIDsAct2 = [0xA6, 0xA7];
+        public static readonly List<Range> PinnedTilesPrimary = [new(0, 0x48), new(0x160, 0x178)];
+        public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
+        public static readonly Range PinnedTilesAct2 = new(0x2C3, 0x2E4);
 
         public static int ReadWord(FileStream file)
         {

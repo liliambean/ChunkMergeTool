@@ -25,37 +25,44 @@ namespace ChunkMergeTool
             List<TileData> tilesPrimary = TileData.Load(Utils.FileTilesPrimary);
             List<TileData> tilesAct1 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct1)).ToList();
             List<TileData> tilesAct2 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct2)).ToList();
-            TileData.MarkUsedAndPinned(blocksAct1, tilesAct1, Utils.AnimatedTileIDsAct1);
-            TileData.MarkUsedAndPinned(blocksAct2, tilesAct2, Utils.AnimatedTileIDsAct2);
+            TileData.MarkUsedAndPinned(blocksAct1, tilesAct1, Utils.PinnedTilesPrimary, Utils.PinnedTilesAct1);
+            TileData.MarkUsedAndPinned(blocksAct2, tilesAct2, Utils.PinnedTilesPrimary, Utils.PinnedTilesAct2);
 
 
             Dictionary<int, TileMatch> tileMatchesAct1 = TileMatch.FindMatches(tilesAct1);
             Dictionary<int, TileMatch> tileMatchesAct2 = TileMatch.FindMatches(tilesAct2);
             TileMatch.MarkPrimary(tileMatchesAct1, tileMatchesAct2);
 
+            (List<TileData> Primary, List<TileData> Act1, List<TileData> Act2) Tiles
+                = Utils.GenerateLists<TileMatch, TileData>(tileMatchesAct1, tileMatchesAct2);
+
+            TileData.EnsurePinned(Tiles.Primary, 0);
+            TileData.EnsurePinned(Tiles.Act1, Tiles.Primary.Count);
+            TileData.EnsurePinned(Tiles.Act2, Tiles.Primary.Count);
+
+
             Dictionary<int, BlockMatch> blockMatchesAct1 = BlockMatch.FindMatches(blocksAct1, tileMatchesAct1);
             Dictionary<int, BlockMatch> blockMatchesAct2 = BlockMatch.FindMatches(blocksAct2, tileMatchesAct2);
             BlockMatch.MarkPrimary(blockMatchesAct1, blockMatchesAct2);
+
+            (List<BlockData> Primary, List<BlockData> Act1, List<BlockData> Act2) Blocks
+                = Utils.GenerateLists<BlockMatch, BlockData>(blockMatchesAct1, blockMatchesAct2);
+
+            BlockMatch.UpdateTileRefs(Blocks.Primary, blockMatchesAct1);
+            BlockMatch.UpdateTileRefs(Blocks.Act1, blockMatchesAct1);
+            BlockMatch.UpdateTileRefs(Blocks.Act2, blockMatchesAct2);
+
 
             Dictionary<int, ChunkMatch> chunkMatchesAct1 = ChunkMatch.FindMatches(chunksAct1, blockMatchesAct1);
             Dictionary<int, ChunkMatch> chunkMatchesAct2 = ChunkMatch.FindMatches(chunksAct2, blockMatchesAct2);
             ChunkMatch.MarkPrimary(chunkMatchesAct1, chunkMatchesAct2);
 
-            // TODOs
-            // Process block data
-            // Ensure duplicate tiles for block collision purposes
-            // Ensure pinned tiles
-            // Process chunk data
-
-            (List<TileData> Primary, List<TileData> Act1, List<TileData> Act2) Tiles
-                = Utils.GenerateLists<TileMatch, TileData>(tileMatchesAct1, tileMatchesAct2);
-
-            (List<BlockData> Primary, List<BlockData> Act1, List<BlockData> Act2) Blocks
-                = Utils.GenerateLists<BlockMatch, BlockData>(blockMatchesAct1, blockMatchesAct2);
-
             (List<ChunkData> Primary, List<ChunkData> Act1, List<ChunkData> Act2) Chunks
                 = Utils.GenerateLists<ChunkMatch, ChunkData>(chunkMatchesAct1, chunkMatchesAct2);
 
+            ChunkMatch.UpdateBlockRefs(Chunks.Primary, chunkMatchesAct1);
+            ChunkMatch.UpdateBlockRefs(Chunks.Act1, chunkMatchesAct1);
+            ChunkMatch.UpdateBlockRefs(Chunks.Act2, chunkMatchesAct2);
 
             return;
 
