@@ -1,6 +1,5 @@
 ﻿using ChunkMergeTool.Analysis;
 using ChunkMergeTool.LevelData;
-using ChunkMergeTool.Reports;
 
 namespace ChunkMergeTool
 {
@@ -72,33 +71,6 @@ namespace ChunkMergeTool
             ChunkMatch.UpdateBlockRefs(Chunks.Primary, blockMatchesAct1);
             ChunkMatch.UpdateBlockRefs(Chunks.Act1, blockMatchesAct1);
             ChunkMatch.UpdateBlockRefs(Chunks.Act2, blockMatchesAct2);
-
-            return;
-
-            List<ChunkDataEx> chunksEx1 = ReportUtils.MarkDuplicateChunks(chunksAct1);
-            List<ChunkDataEx> chunksEx2 = ReportUtils.MarkDuplicateChunks(chunksAct2);
-            ReportUtils.BlankUnusedChunks(chunksEx1);
-            ReportUtils.BlankUnusedChunks(chunksEx2);
-
-            List<BlockMapping?>? blockMappings = ReportUtils.AnalyzeChunks(chunksEx1, chunksEx2, blocksPrimary.Count);
-            if (blockMappings == null)
-            {
-                Console.WriteLine("Completed with errors; a report has been created.");
-                return;
-            }
-
-            List<BlockConfirmMatch>? blockConfirm = ReportUtils.AnalyzeBlocks(blockMappings);
-            if (blockConfirm == null)
-            {
-                Console.WriteLine("Completed with errors; a report has been created.");
-                return;
-            }
-
-            if (!ReportUtils.AnalyzeTiles(blockConfirm, blocksAct1, blocksAct2, tilesAct1, tilesAct2))
-            {
-                Console.WriteLine("Tile mismatch error");
-                return;
-            }
         }
     }
 
