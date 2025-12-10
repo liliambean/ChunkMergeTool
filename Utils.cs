@@ -32,6 +32,10 @@ namespace ChunkMergeTool
         public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
         public static readonly Range PinnedTilesAct2 = new(0x2C3, 0x2E4);
 
+        public const int ChunkSize = 0x40;
+        public const int BlockSize = 4;
+        public const int TileSize = 0x20;
+
         public static int ReadWord(FileStream file)
         {
             return (file.ReadByte() << 8) | file.ReadByte();
@@ -45,7 +49,145 @@ namespace ChunkMergeTool
             if (predicate(true, true)) callback(true, true);
         }
 
-        public static List<TData> CreateShortlist<TMatch, TData>(Dictionary<int, TMatch> dictionary) where TData: IData where TMatch : IMatch<TData>
+
+        public static bool Equals(
+            this ChunkData chunk1, ChunkData chunk2,
+            Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2)
+        {
+            for (int index = 0; index < ChunkSize; index++)
+            {
+                BlockRef blockRef1 = chunk1.Definition[index];
+                BlockRef blockRef2 = chunk2.Definition[index];
+
+                if (blockRef1.SolidLayerA != blockRef2.SolidLayerA || blockRef1.SolidLayerB != blockRef2.SolidLayerB)
+                    return false;
+
+                BlockMatch match1 = blocks1[blockRef1.Id];
+                BlockMatch match2 = blocks2[blockRef2.Id];
+
+                if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool Equals(
+            this BlockData block1, BlockData block2, bool xFlip, bool yFlip,
+            Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
+        {
+            if (block1.Collision != block2.Collision)
+                return false;
+
+            IList<int> lookup;
+
+            if (!xFlip && !yFlip) lookup =
+            [
+                0x00, 0x01,
+                0x02, 0x03,
+            ];
+            else if (xFlip && !yFlip) lookup =
+            [
+                0x01, 0x00,
+                0x03, 0x02,
+            ];
+            else if (!xFlip && yFlip) lookup =
+            [
+                0x02, 0x03,
+                0x00, 0x01,
+            ];
+            else lookup =
+            [
+                0x03, 0x02,
+                0x01, 0x00,
+            ];
+
+            for (int index = 0; index < BlockSize; index++)
+            {
+                TileRef tileRef1 = block1.Definition[index];
+                TileRef tileRef2 = block2.Definition[lookup[index]];
+
+                if (tileRef1.Palette != tileRef2.Palette || tileRef1.Priority != tileRef2.Priority)
+                    return false;
+
+                TileMatch match1 = tiles1[tileRef1.Id];
+                TileMatch match2 = tiles2[tileRef2.Id];
+                bool xFlip2 = match2.XFlip ^ xFlip;
+                bool yFlip2 = match2.YFlip ^ yFlip;
+
+                if (match1.Id != match2.Id || match1.XFlip != xFlip2 || match1.YFlip != yFlip2)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool Equals(this TileData tile1, TileData tile2, bool xFlip, bool yFlip)
+        {
+            IList<int> lookup;
+
+            if (!xFlip && !yFlip) lookup =
+            [
+                0x00, 0x01, 0x02, 0x03,
+                0x04, 0x05, 0x06, 0x07,
+                0x08, 0x09, 0x0A, 0x0B,
+                0x0C, 0x0D, 0x0E, 0x0F,
+                0x10, 0x11, 0x12, 0x13,
+                0x14, 0x15, 0x16, 0x17,
+                0x18, 0x19, 0x1A, 0x1B,
+                0x1C, 0x1D, 0x1E, 0x1F,
+            ];
+            else if (xFlip && !yFlip) lookup =
+            [
+                0x03, 0x02, 0x01, 0x00,
+                0x07, 0x06, 0x05, 0x04,
+                0x0B, 0x0A, 0x09, 0x08,
+                0x0F, 0x0E, 0x0D, 0x0C,
+                0x13, 0x12, 0x11, 0x10,
+                0x17, 0x16, 0x15, 0x14,
+                0x1B, 0x1A, 0x19, 0x18,
+                0x1F, 0x1E, 0x1D, 0x1C,
+            ];
+            else if (!xFlip && yFlip) lookup =
+            [
+                0x1C, 0x1D, 0x1E, 0x1F,
+                0x18, 0x19, 0x1A, 0x1B,
+                0x14, 0x15, 0x16, 0x17,
+                0x10, 0x11, 0x12, 0x13,
+                0x0C, 0x0D, 0x0E, 0x0F,
+                0x08, 0x09, 0x0A, 0x0B,
+                0x04, 0x05, 0x06, 0x07,
+                0x00, 0x01, 0x02, 0x03,
+            ];
+            else lookup =
+            [
+                0x1F, 0x1E, 0x1D, 0x1C,
+                0x1B, 0x1A, 0x19, 0x18,
+                0x17, 0x16, 0x15, 0x14,
+                0x13, 0x12, 0x11, 0x10,
+                0x0F, 0x0E, 0x0D, 0x0C,
+                0x0B, 0x0A, 0x09, 0x08,
+                0x07, 0x06, 0x05, 0x04,
+                0x03, 0x02, 0x01, 0x00,
+            ];
+
+            for (int index = 0; index < TileSize; index++)
+            {
+                int byte1 = tile1.Bytes[index];
+                int byte2 = tile2.Bytes[lookup[index]];
+
+                if (xFlip)
+                    byte2 = ((byte2 & 0x0F) << 4) | ((byte2 & 0xF0) >> 4);
+
+                if (byte1 != byte2)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static List<TData> CreateShortlist<TMatch, TData>(
+            Dictionary<int, TMatch> dictionary) where TData: IData where TMatch : IMatch<TData>
         {
             return dictionary
                 .GroupBy(entry => entry.Value.Data)
@@ -55,7 +197,7 @@ namespace ChunkMergeTool
         }
 
         public static (List<TData>, List<TData>, List<TData>) GenerateLists<TMatch, TData>(
-            Dictionary<int, TMatch> matches1, Dictionary<int, TMatch> matches2) where TData : IData where TMatch : IMatch<TData>
+            Dictionary<int, TMatch> matches1, Dictionary<int, TMatch> matches2) where TMatch : IMatch<TData> where TData : IData
         {
             List<TData> act1 = CreateShortlist<TMatch, TData>(matches1);
             List<TData> act2 = CreateShortlist<TMatch, TData>(matches2);
@@ -65,6 +207,13 @@ namespace ChunkMergeTool
             act2.RemoveAll(primary.Contains);
 
             return (primary, act1, act2);
+        }
+
+        public static void EnsureIds<TMatch, TData>(
+            List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData> where TData : IData
+        {
+            foreach (TMatch match in matches.Values)
+                match.Id = data.IndexOf(match.Data);
         }
 
         public static void ProcessKosFile(string source, string destination, bool moduled, bool extract)

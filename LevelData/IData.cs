@@ -2,9 +2,9 @@
 {
     internal interface IData
     {
-        public bool Primary { get; set; }
+        bool Primary { get; }
 
-        public bool Used { get; set; }
+        bool Used { get; }
     }
 
 }

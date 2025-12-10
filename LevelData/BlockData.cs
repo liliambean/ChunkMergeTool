@@ -24,7 +24,7 @@
             while (file.Position != file.Length)
             {
                 List<TileRef> definition = new(4);
-                for (int index = 0; index < 4; index++)
+                for (int index = 0; index < Utils.BlockSize; index++)
                 {
                     int word = Utils.ReadWord(file);
                     definition.Add(new TileRef(word));

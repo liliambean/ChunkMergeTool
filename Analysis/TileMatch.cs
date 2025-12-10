@@ -10,6 +10,8 @@ namespace ChunkMergeTool.Analysis
 
         public bool YFlip { get; set; } = yFlip;
 
+        public int Id { get; set; }
+
         public static Dictionary<int, TileMatch> FindMatches(List<TileData> tiles)
         {
             Dictionary<int, List<TileMatch>> matches = [];
@@ -18,14 +20,15 @@ namespace ChunkMergeTool.Analysis
             {
                 TileData tile = tiles[index];
                 if (!tile.Used) continue;
-                List<TileMatch> matchesForTile = [];
+
+                List<TileMatch> tileMatches = [];
 
                 Utils.ForEachFlipWhere(
                     (xFlip, yFlip) => tile.Equals(tile, xFlip, yFlip),
-                    (xFlip, yFlip) => matchesForTile.Add(new TileMatch(tile, xFlip, yFlip))
+                    (xFlip, yFlip) => tileMatches.Add(new TileMatch(tile, xFlip, yFlip))
                 );
 
-                matches[index] = matchesForTile;
+                matches[index] = tileMatches;
             }
 
             for (int index1 = 0; index1 < tiles.Count - 1; index1++)
@@ -37,15 +40,17 @@ namespace ChunkMergeTool.Analysis
                 {
                     TileData tile2 = tiles[index2];
                     if (!tile2.Used) continue;
-                    List<TileMatch> matchesForTile1 = matches[index1];
+
+                    List<TileMatch> tile1matches = matches[index1];
+                    List<TileMatch> tile2matches = matches[index2];
 
                     Utils.ForEachFlipWhere(
                         (xFlip, yFlip) => tile1.Equals(tile2, xFlip, yFlip),
                         (xFlip, yFlip) =>
                         {
-                            matchesForTile1.Add(new TileMatch(tile2, xFlip, yFlip));
+                            tile1matches.Add(new TileMatch(tile2, xFlip, yFlip));
                             if (tile2.Pinned != PinnedKind.None) return;
-                            matches[index2].Add(new TileMatch(tile1, xFlip, yFlip));
+                            tile2matches.Add(new TileMatch(tile1, xFlip, yFlip));
                         });
                 }
             }

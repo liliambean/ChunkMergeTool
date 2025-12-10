@@ -144,7 +144,7 @@ namespace ChunkMergeTool.Reports
                     Dictionary<int, int> guessedMappings = [];
                     bool match = true;
 
-                    for (int blockIndex = 0; blockIndex < 0x40; blockIndex++)
+                    for (int blockIndex = 0; blockIndex < Utils.ChunkSize; blockIndex++)
                     {
                         BlockRef block1 = chunk1.Definition[blockIndex];
                         BlockRef block2 = chunk2.Definition[blockIndex];
@@ -172,7 +172,7 @@ namespace ChunkMergeTool.Reports
                     if (!match)
                         continue;
 
-                    for (int blockIndex = 0; blockIndex < 0x40; blockIndex++)
+                    for (int blockIndex = 0; blockIndex < Utils.ChunkSize; blockIndex++)
                     {
                         BlockRef block1 = chunk1.Definition[blockIndex];
                         BlockRef block2 = chunk2.Definition[blockIndex];
@@ -238,7 +238,7 @@ namespace ChunkMergeTool.Reports
                     ChunkDataEx chunk2 = chunks[index2];
                     bool match = true;
 
-                    for (int blockIndex = 0; blockIndex < 0x40; blockIndex++)
+                    for (int blockIndex = 0; blockIndex < Utils.ChunkSize; blockIndex++)
                     {
                         if (chunk1.Definition[blockIndex].Word != chunk2.Definition[blockIndex].Word)
                         {

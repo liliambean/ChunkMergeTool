@@ -21,8 +21,8 @@
 
             while (file.Position != file.Length)
             {
-                List<BlockRef> definition = new(0x40);
-                for (int index = 0; index < 0x40; index++)
+                List<BlockRef> definition = new(Utils.ChunkSize);
+                for (int index = 0; index < Utils.ChunkSize; index++)
                 {
                     int word = Utils.ReadWord(file);
                     definition.Add(new BlockRef(word));
