@@ -7,35 +7,35 @@ namespace ChunkMergeTool
 {
     internal static class Utils
     {
-        public static readonly string WorkingDir = @"D:\s3unlocked\Levels\LBZ\Chunks";
+        public const int ChunkSize = 0x40;
+        public const int BlockSize = 4;
+        public const int TileSize = 0x20;
 
-        public static readonly string FileBlocksReport = @"blocks.txt";
-        public static readonly string FileChunksReport = @"chunks.txt";
+        public const string WorkingDir = @"D:\s3unlocked\Levels\LBZ\Chunks";
 
-        public static readonly string FileLayoutAct1 = @"..\Layout\1.bin";
-        public static readonly string FileLayoutAct2 = @"..\Layout\2.bin";
-        public static readonly string FileCollisionAct1 = @"..\Collision\1.bin";
-        public static readonly string FileCollisionAct2 = @"..\Collision\2.bin";
+        public const string FileBlocksReport = @"blocks.txt";
+        public const string FileChunksReport = @"chunks.txt";
 
-        public static readonly string FileChunksPrimary = @"Primary";
-        public static readonly string FileChunksAct1 = @"Act 1";
-        public static readonly string FileChunksAct2 = @"Act 2";
-        public static readonly string FileBlocksPrimary = @"..\Blocks\Primary";
-        public static readonly string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
-        public static readonly string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
-        public static readonly string FileTilesPrimary = @"..\Tiles\Primary";
-        public static readonly string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
-        public static readonly string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
+        public const string FileLayoutAct1 = @"..\Layout\1.bin";
+        public const string FileLayoutAct2 = @"..\Layout\2.bin";
+        public const string FileCollisionAct1 = @"..\Collision\1.bin";
+        public const string FileCollisionAct2 = @"..\Collision\2.bin";
+
+        public const string FileChunksPrimary = @"Primary";
+        public const string FileChunksAct1 = @"Act 1";
+        public const string FileChunksAct2 = @"Act 2";
+        public const string FileBlocksPrimary = @"..\Blocks\Primary";
+        public const string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
+        public const string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
+        public const string FileTilesPrimary = @"..\Tiles\Primary";
+        public const string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
+        public const string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
 
         public static readonly List<byte> EventChunkIDsAct1 = [0xDA];
         public static readonly List<byte> EventChunkIDsAct2 = [0xA6, 0xA7];
         public static readonly List<Range> PinnedTilesPrimary = [new(0, 0x48), new(0x160, 0x178)];
         public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
         public static readonly Range PinnedTilesAct2 = new(0x2C3, 0x2E4);
-
-        public const int ChunkSize = 0x40;
-        public const int BlockSize = 4;
-        public const int TileSize = 0x20;
 
         public static int ReadWord(FileStream file)
         {
@@ -49,7 +49,6 @@ namespace ChunkMergeTool
             if (predicate(false, true)) callback(false, true);
             if (predicate(true, true)) callback(true, true);
         }
-
 
         public static bool Equals(
             this ChunkData chunk1, ChunkData chunk2,
@@ -210,18 +209,36 @@ namespace ChunkMergeTool
             return (primary, act1, act2);
         }
 
-        public static void EnsureIds<TMatch, TData>(
+        public static List<TData> EnsureIds<TMatch, TData>(
             List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData> where TData : IData
         {
             foreach (TMatch match in matches.Values)
                 match.Id = data.IndexOf(match.Data);
+
+            return data;
         }
 
         public static void UpdateChunkRefs(LayoutData layout, Dictionary<int, ChunkMatch> matches)
         {
-            foreach (List<byte> layoutRow in layout.Rows)
-                for (int index = 0; index < layoutRow.Count; index++)
+            foreach (byte[] layoutRow in layout.Rows)
+                for (int index = 0; index < layoutRow.Length; index++)
                     layoutRow[index] = (byte)matches[layoutRow[index]].Id;
+        }
+
+        public static IEnumerable<byte> ToBytes(this IEnumerable<int> words)
+        {
+            foreach (int word in words)
+            {
+                yield return (byte)(word >> 8);
+                yield return (byte)word;
+            }
+
+            yield break;
+        }
+
+        public static (string, string) GetKosFileNames(string filename)
+        {
+            return ($"{filename}.bin", $"{filename} unc.bin");
         }
 
         public static void ProcessKosFile(string source, string destination, bool moduled, bool extract)

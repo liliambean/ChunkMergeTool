@@ -1,49 +1,56 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    using LayoutRow = List<byte>;
-
-    internal class LayoutData(List<LayoutRow> foreground, List<LayoutRow> background)
+    internal class LayoutData(List<byte[]> foreground, List<byte[]> background)
     {
-        public List<LayoutRow> Foreground { get; set; } = foreground;
-
-        public List<LayoutRow> Background { get; set; } = background;
-
-        public IEnumerable<LayoutRow> Rows => Foreground.Concat(Background);
+        public IEnumerable<byte[]> Rows => foreground.Concat(background);
 
         public static LayoutData Load(string filename)
         {
-            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
-            int widthFG = Utils.ReadWord(file);
-            int widthBG = Utils.ReadWord(file);
-            int heightFG = Utils.ReadWord(file);
-            int heightBG = Utils.ReadWord(file);
-            List<int> ptrsFG = new(0x20);
-            List<int> ptrsBG = new(0x20);
+            List<byte[]> foreground;
+            List<byte[]> background;
 
-            for (int index = 0; index < 0x20; index++)
+            using (FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename)))
             {
-                ptrsFG.Add(Utils.ReadWord(file));
-                ptrsBG.Add(Utils.ReadWord(file));
+                int widthFG = Utils.ReadWord(file);
+                int widthBG = Utils.ReadWord(file);
+                int heightFG = Utils.ReadWord(file);
+                int heightBG = Utils.ReadWord(file);
+                List<int> ptrsFG = new(0x20);
+                List<int> ptrsBG = new(0x20);
+
+                for (int index = 0; index < 0x20; index++)
+                {
+                    ptrsFG.Add(Utils.ReadWord(file));
+                    ptrsBG.Add(Utils.ReadWord(file));
+                }
+
+                foreground = ReadLayoutRow(file, widthFG, heightFG, ptrsFG);
+                background = ReadLayoutRow(file, widthBG, heightBG, ptrsBG);
             }
 
-            List<LayoutRow> foreground = ReadLayoutRow(file, widthFG, heightFG, ptrsFG);
-            List<LayoutRow> background = ReadLayoutRow(file, widthBG, heightBG, ptrsBG);
             return new LayoutData(foreground, background);
         }
 
-        private static List<LayoutRow> ReadLayoutRow(FileStream file, int bufferSize, int rowCount, IEnumerable<int> rowPtrs)
+        public static void Save(LayoutData layout, string filename)
         {
-            List<LayoutRow> rows = new(rowCount);
+            using FileStream file = File.Open(Path.Combine(Utils.WorkingDir, filename), FileMode.Open);
+            file.Seek(0x88, SeekOrigin.Begin);
+            file.Write(layout.Rows.SelectMany(row => row).ToArray());
+        }
+
+        private static List<byte[]> ReadLayoutRow(FileStream file, int rowLength, int rowCount, IEnumerable<int> rowPtrs)
+        {
+            List<byte[]> rows = new(rowCount);
 
             foreach (int ptr in rowPtrs)
             {
                 if (rows.Count == rowCount)
                     break;
 
-                byte[] buffer = new byte[bufferSize];
+                byte[] bytes = new byte[rowLength];
                 file.Seek(ptr - 0x8000, SeekOrigin.Begin);
-                file.ReadExactly(buffer);
-                rows.Add(buffer.ToList());
+                file.ReadExactly(bytes);
+                rows.Add(bytes);
             }
 
             return rows;

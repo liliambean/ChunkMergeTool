@@ -1,6 +1,6 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class ChunkData(List<BlockRef> definition): IData
+    internal class ChunkData(List<BlockRef> definition) : IData
     {
         public List<BlockRef> Definition { get; set; } = definition;
 
@@ -8,35 +8,48 @@
 
         public bool Used { get; set; }
 
-        public IEnumerable<int> Words => Definition.Select(blockRef => blockRef.Word);
+        public byte[] Bytes => Definition.Select(blockRef => blockRef.Word).ToBytes().ToArray();
 
         public static List<ChunkData> Load(string filename)
         {
-            string compressed = $"{filename}.bin";
-            string uncompressed = $"{filename} unc.bin";
+            (string compressed, string uncompressed) = Utils.GetKosFileNames(filename);
             Utils.ProcessKosFile(compressed, uncompressed, moduled: false, extract: true);
 
-            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
             List<ChunkData> list = [];
-
-            while (file.Position != file.Length)
+            using (FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed)))
             {
-                List<BlockRef> definition = new(Utils.ChunkSize);
-                for (int index = 0; index < Utils.ChunkSize; index++)
+                while (file.Position != file.Length)
                 {
-                    int word = Utils.ReadWord(file);
-                    definition.Add(new BlockRef(word));
-                }
+                    List<BlockRef> definition = new(Utils.ChunkSize);
+                    for (int index = 0; index < Utils.ChunkSize; index++)
+                    {
+                        int word = Utils.ReadWord(file);
+                        definition.Add(new BlockRef(word));
+                    }
 
-                list.Add(new ChunkData(definition));
+                    list.Add(new ChunkData(definition));
+                }
             }
 
             return list;
         }
 
+        public static void Save(List<ChunkData> chunks, string filename)
+        {
+            (string compressed, string uncompressed) = Utils.GetKosFileNames(filename);
+
+            using (FileStream file = File.Open(Path.Combine(Utils.WorkingDir, uncompressed), FileMode.Create))
+            {
+                foreach (ChunkData chunk in chunks)
+                    file.Write(chunk.Bytes);
+            }
+
+            Utils.ProcessKosFile(uncompressed, compressed, moduled: false, extract: false);
+        }
+
         public static void MarkUsed(LayoutData layout, List<ChunkData> chunks, List<byte> usedIds)
         {
-            foreach (List<byte> layoutRow in layout.Rows)
+            foreach (byte[] layoutRow in layout.Rows)
                 foreach (byte chunkId in layoutRow)
                     chunks[chunkId].Used = true;
 

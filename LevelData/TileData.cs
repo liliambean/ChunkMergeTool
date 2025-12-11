@@ -1,8 +1,8 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class TileData(IList<byte> bytes) : IData
+    internal class TileData(byte[] bytes) : IData
     {
-        public IList<byte> Bytes { get; set; } = bytes;
+        public byte[] Bytes { get; set; } = bytes;
 
         public bool Primary { get; set; }
 
@@ -14,21 +14,34 @@
 
         public static List<TileData> Load(string filename)
         {
-            string compressed = $"{filename}.bin";
-            string uncompressed = $"{filename} unc.bin";
+            (string compressed, string uncompressed) = Utils.GetKosFileNames(filename);
             Utils.ProcessKosFile(compressed, uncompressed, moduled: true, extract: true);
 
-            FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed));
             List<TileData> list = [];
-
-            while (file.Position != file.Length)
+            using (FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, uncompressed)))
             {
-                byte[] bytes = new byte[Utils.TileSize];
-                file.ReadExactly(bytes);
-                list.Add(new TileData(bytes));
+                while (file.Position != file.Length)
+                {
+                    byte[] bytes = new byte[Utils.TileSize];
+                    file.ReadExactly(bytes);
+                    list.Add(new TileData(bytes));
+                }
             }
 
             return list;
+        }
+
+        public static void Save(List<TileData> tiles, string filename)
+        {
+            (string compressed, string uncompressed) = Utils.GetKosFileNames(filename);
+
+            using (FileStream file = File.Open(Path.Combine(Utils.WorkingDir, uncompressed), FileMode.Create))
+            {
+                foreach (TileData tile in tiles)
+                    file.Write(tile.Bytes);
+            }
+
+            Utils.ProcessKosFile(uncompressed, compressed, moduled: true, extract: false);
         }
 
         public static void MarkUsedAndPinned(List<BlockData> blocks, List<TileData> tiles, List<Range> rangePrimary, Range rangeAct)

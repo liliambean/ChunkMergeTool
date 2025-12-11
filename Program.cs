@@ -40,8 +40,8 @@ namespace ChunkMergeTool
             TileData.EnsurePinned(Tiles.Act1, Tiles.Primary.Count);
             TileData.EnsurePinned(Tiles.Act2, Tiles.Primary.Count);
 
-            Utils.EnsureIds(new List<TileData>([..Tiles.Primary, ..Tiles.Act1]), tileMatchesAct1);
-            Utils.EnsureIds(new List<TileData>([..Tiles.Primary, ..Tiles.Act2]), tileMatchesAct2);
+            Utils.EnsureIds(Tiles.Primary.Concat(Tiles.Act1).ToList(), tileMatchesAct1);
+            Utils.EnsureIds(Tiles.Primary.Concat(Tiles.Act2).ToList(), tileMatchesAct2);
 
 
 
@@ -56,8 +56,8 @@ namespace ChunkMergeTool
             BlockMatch.UpdateTileRefs(Blocks.Act1, tileMatchesAct1);
             BlockMatch.UpdateTileRefs(Blocks.Act2, tileMatchesAct2);
 
-            Utils.EnsureIds(new List<BlockData>([..Blocks.Primary, ..Blocks.Act1]), blockMatchesAct1);
-            Utils.EnsureIds(new List<BlockData>([..Blocks.Primary, ..Blocks.Act2]), blockMatchesAct2);
+            List<BlockData> collisionAct1 = Utils.EnsureIds(Blocks.Primary.Concat(Blocks.Act1).ToList(), blockMatchesAct1);
+            List<BlockData> collisionAct2 = Utils.EnsureIds(Blocks.Primary.Concat(Blocks.Act2).ToList(), blockMatchesAct2);
 
 
 
@@ -72,15 +72,31 @@ namespace ChunkMergeTool
             ChunkMatch.UpdateBlockRefs(Chunks.Act1, blockMatchesAct1);
             ChunkMatch.UpdateBlockRefs(Chunks.Act2, blockMatchesAct2);
 
-            Utils.EnsureIds(new List<ChunkData>([..Chunks.Primary, ..Chunks.Act1]), chunkMatchesAct1);
-            Utils.EnsureIds(new List<ChunkData>([..Chunks.Primary, ..Chunks.Act2]), chunkMatchesAct2);
+            Utils.EnsureIds(Chunks.Primary.Concat(Chunks.Act1).ToList(), chunkMatchesAct1);
+            Utils.EnsureIds(Chunks.Primary.Concat(Chunks.Act2).ToList(), chunkMatchesAct2);
 
 
 
             Utils.UpdateChunkRefs(layoutAct1, chunkMatchesAct1);
             Utils.UpdateChunkRefs(layoutAct2, chunkMatchesAct2);
 
-            return;
+            LayoutData.Save(layoutAct1, Utils.FileLayoutAct1);
+            LayoutData.Save(layoutAct2, Utils.FileLayoutAct2);
+
+            ChunkData.Save(Chunks.Primary, Utils.FileChunksPrimary);
+            ChunkData.Save(Chunks.Act1, Utils.FileChunksAct1);
+            ChunkData.Save(Chunks.Act2, Utils.FileChunksAct2);
+
+            BlockData.Save(Blocks.Primary, Utils.FileBlocksPrimary);
+            BlockData.Save(Blocks.Act1, Utils.FileBlocksAct1);
+            BlockData.Save(Blocks.Act2, Utils.FileBlocksAct2);
+
+            BlockData.SaveCollision(collisionAct1, Utils.FileCollisionAct1);
+            BlockData.SaveCollision(collisionAct2, Utils.FileCollisionAct2);
+
+            TileData.Save(Tiles.Primary, Utils.FileTilesPrimary);
+            TileData.Save(Tiles.Act1, Utils.FileTilesAct1);
+            TileData.Save(Tiles.Act2, Utils.FileTilesAct2);
         }
     }
 
