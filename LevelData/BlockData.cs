@@ -53,6 +53,7 @@
         {
             using FileStream file = File.Open(Path.Combine(Utils.WorkingDir, filename), FileMode.Create);
             file.Write(blocks.Select(block => block.Collision).ToBytes().ToArray());
+            file.SetLength(0x600);
         }
 
         public static void MarkUsedAndLoadCollision(List<ChunkData> chunks, List<BlockData> blocks, string filename)
@@ -83,8 +84,8 @@
         public int Word =>
             (Priority ? 0x8000 : 0) |
             (Palette << 13) |
-            (YFlip ? 0x800 : 0) |
-            (XFlip ? 0x400 : 0) |
+            (YFlip ? 0x1000 : 0) |
+            (XFlip ? 0x800 : 0) |
             Id;
     }
 
