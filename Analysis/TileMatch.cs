@@ -72,12 +72,12 @@ namespace ChunkMergeTool.Analysis
                         (xFlip, yFlip) => tile1.Equals(tile2, xFlip, yFlip),
                         (xFlip, yFlip) =>
                         {
-                            foreach (TileMatch tile in matches2.Values.Where(tile => tile.Data == tile2))
+                            foreach (TileMatch match in matches2.Values.Where(match => match.Data == tile2))
                             {
-                                tile.XFlip ^= xFlip;
-                                tile.YFlip ^= yFlip;
-                                tile.Data = tile1;
-                                tile.Data.Used = false;
+                                match.XFlip ^= xFlip;
+                                match.YFlip ^= yFlip;
+                                match.Data = tile1;
+                                match.Data.Used = false;
                             }
 
                             tile1.Primary = true;

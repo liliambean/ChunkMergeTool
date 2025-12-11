@@ -66,10 +66,10 @@ namespace ChunkMergeTool.Analysis
                 foreach (ChunkData chunk2 in act2)
                     if (chunk1.Equals(chunk2, blocks1, blocks2))
                     {
-                        foreach (ChunkMatch chunk in matches2.Values.Where(chunk => chunk.Data == chunk2))
+                        foreach (ChunkMatch match in matches2.Values.Where(match => match.Data == chunk2))
                         {
-                            chunk.Data = chunk1;
-                            chunk.Data.Used = false;
+                            match.Data = chunk1;
+                            match.Data.Used = false;
                         }
 
                         chunk1.Primary = true;
