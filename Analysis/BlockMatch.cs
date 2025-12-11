@@ -61,15 +61,18 @@ namespace ChunkMergeTool.Analysis
                 entry => entry.Value.OrderBy(block => blocks.IndexOf(block.Data)).First());
         }
 
-        public static void MarkPrimary(
+        public static (List<BlockData>, List<BlockData>, List<BlockData>) GenerateLists(
             Dictionary<int, BlockMatch> matches1, Dictionary<int, BlockMatch> matches2,
             Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
         {
             List<BlockData> act1 = Utils.CreateShortlist<BlockMatch, BlockData>(matches1);
             List<BlockData> act2 = Utils.CreateShortlist<BlockMatch, BlockData>(matches2);
+            List<BlockData> primary = [];
 
             foreach (BlockData block1 in act1)
             {
+                bool isMatch = false;
+
                 foreach (BlockData block2 in act2)
                     Utils.ForEachFlipWhere(
                         (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tiles1, tiles2),
@@ -77,17 +80,21 @@ namespace ChunkMergeTool.Analysis
                         {
                             foreach (BlockMatch match in matches2.Values.Where(match => match.Data == block2))
                             {
+                                match.Data = block1;
                                 match.XFlip ^= xFlip;
                                 match.YFlip ^= yFlip;
-                                match.Data = block1;
-                                match.Data.Used = false;
                             }
 
-                            block1.Primary = true;
+                            isMatch = true;
+                            block2.Used = false;
                         });
 
                 act2.RemoveAll(block => !block.Used);
+                if (isMatch) primary.Add(block1);
             }
+
+            act1.RemoveAll(primary.Contains);
+            return (primary, act1, act2);
         }
 
         public static void UpdateTileRefs(List<BlockData> blocks, Dictionary<int, TileMatch> matches)

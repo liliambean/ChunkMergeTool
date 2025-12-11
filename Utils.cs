@@ -193,8 +193,7 @@ namespace ChunkMergeTool
             return true;
         }
 
-        public static List<TData> CreateShortlist<TMatch, TData>(
-            Dictionary<int, TMatch> dictionary) where TData: IData where TMatch : IMatch<TData>
+        public static List<TData> CreateShortlist<TMatch, TData>(Dictionary<int, TMatch> dictionary) where TMatch : IMatch<TData>
         {
             return dictionary
                 .GroupBy(entry => entry.Value.Data)
@@ -203,21 +202,7 @@ namespace ChunkMergeTool
                 .ToList();
         }
 
-        public static (List<TData>, List<TData>, List<TData>) GenerateLists<TMatch, TData>(
-            Dictionary<int, TMatch> matches1, Dictionary<int, TMatch> matches2) where TMatch : IMatch<TData> where TData : IData
-        {
-            List<TData> act1 = CreateShortlist<TMatch, TData>(matches1);
-            List<TData> act2 = CreateShortlist<TMatch, TData>(matches2);
-            List<TData> primary = act1.Where(item => item.Primary).ToList();
-
-            act1.RemoveAll(primary.Contains);
-            act2.RemoveAll(primary.Contains);
-
-            return (primary, act1, act2);
-        }
-
-        public static List<TData> EnsureIds<TMatch, TData>(
-            List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData> where TData : IData
+        public static List<TData> EnsureIds<TMatch, TData>(List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData>
         {
             foreach (TMatch match in matches.Values)
                 match.Id = data.IndexOf(match.Data);

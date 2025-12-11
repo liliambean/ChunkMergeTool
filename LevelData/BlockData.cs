@@ -1,10 +1,8 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class BlockData(List<TileRef> definition) : IData
+    internal class BlockData(List<TileRef> definition)
     {
         public List<TileRef> Definition { get; set; } = definition;
-
-        public bool Primary { get; set; }
 
         public bool Used { get; set; }
 

@@ -54,29 +54,34 @@ namespace ChunkMergeTool.Analysis
                 entry => entry.Value.OrderBy(chunk => chunks.IndexOf(chunk.Data)).First());
         }
 
-        public static void MarkPrimary(
+        public static (List<ChunkData>, List<ChunkData>, List<ChunkData>) GenerateLists(
             Dictionary<int, ChunkMatch> matches1, Dictionary<int, ChunkMatch> matches2,
             Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2)
         {
             List<ChunkData> act1 = Utils.CreateShortlist<ChunkMatch, ChunkData>(matches1);
             List<ChunkData> act2 = Utils.CreateShortlist<ChunkMatch, ChunkData>(matches2);
+            List<ChunkData> primary = [];
 
             foreach (ChunkData chunk1 in act1)
             {
+                bool isMatch = false;
+
                 foreach (ChunkData chunk2 in act2)
                     if (chunk1.Equals(chunk2, blocks1, blocks2))
                     {
                         foreach (ChunkMatch match in matches2.Values.Where(match => match.Data == chunk2))
-                        {
                             match.Data = chunk1;
-                            match.Data.Used = false;
-                        }
 
-                        chunk1.Primary = true;
+                        isMatch = true;
+                        chunk2.Used = false;
                     }
 
                 act2.RemoveAll(chunk => !chunk.Used);
+                if (isMatch) primary.Add(chunk1);
             }
+
+            act1.RemoveAll(primary.Contains);
+            return (primary, act1, act2);
         }
 
         public static void UpdateBlockRefs(List<ChunkData> chunks, Dictionary<int, BlockMatch> matches)

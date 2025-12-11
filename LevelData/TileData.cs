@@ -1,10 +1,8 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class TileData(byte[] bytes) : IData
+    internal class TileData(byte[] bytes)
     {
         public byte[] Bytes { get; set; } = bytes;
-
-        public bool Primary { get; set; }
 
         public bool Used { get; set; }
 

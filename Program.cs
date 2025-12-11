@@ -31,10 +31,9 @@ namespace ChunkMergeTool
 
             Dictionary<int, TileMatch> tileMatchesAct1 = TileMatch.FindMatches(tilesAct1);
             Dictionary<int, TileMatch> tileMatchesAct2 = TileMatch.FindMatches(tilesAct2);
-            TileMatch.MarkPrimary(tileMatchesAct1, tileMatchesAct2);
 
             (List<TileData> Primary, List<TileData> Act1, List<TileData> Act2) Tiles
-                = Utils.GenerateLists<TileMatch, TileData>(tileMatchesAct1, tileMatchesAct2);
+                = TileMatch.GenerateLists(tileMatchesAct1, tileMatchesAct2);
 
             TileData.EnsurePinned(Tiles.Primary, 0);
             TileData.EnsurePinned(Tiles.Act1, Tiles.Primary.Count);
@@ -47,10 +46,9 @@ namespace ChunkMergeTool
 
             Dictionary<int, BlockMatch> blockMatchesAct1 = BlockMatch.FindMatches(blocksAct1, tileMatchesAct1);
             Dictionary<int, BlockMatch> blockMatchesAct2 = BlockMatch.FindMatches(blocksAct2, tileMatchesAct2);
-            BlockMatch.MarkPrimary(blockMatchesAct1, blockMatchesAct2, tileMatchesAct1, tileMatchesAct2);
 
             (List<BlockData> Primary, List<BlockData> Act1, List<BlockData> Act2) Blocks
-                = Utils.GenerateLists<BlockMatch, BlockData>(blockMatchesAct1, blockMatchesAct2);
+                = BlockMatch.GenerateLists(blockMatchesAct1, blockMatchesAct2, tileMatchesAct1, tileMatchesAct2);
 
             BlockMatch.UpdateTileRefs(Blocks.Primary, tileMatchesAct1);
             BlockMatch.UpdateTileRefs(Blocks.Act1, tileMatchesAct1);
@@ -63,10 +61,9 @@ namespace ChunkMergeTool
 
             Dictionary<int, ChunkMatch> chunkMatchesAct1 = ChunkMatch.FindMatches(chunksAct1, blockMatchesAct1);
             Dictionary<int, ChunkMatch> chunkMatchesAct2 = ChunkMatch.FindMatches(chunksAct2, blockMatchesAct2);
-            ChunkMatch.MarkPrimary(chunkMatchesAct1, chunkMatchesAct2, blockMatchesAct1, blockMatchesAct2);
 
             (List<ChunkData> Primary, List<ChunkData> Act1, List<ChunkData> Act2) Chunks
-                = Utils.GenerateLists<ChunkMatch, ChunkData>(chunkMatchesAct1, chunkMatchesAct2);
+                = ChunkMatch.GenerateLists(chunkMatchesAct1, chunkMatchesAct2, blockMatchesAct1, blockMatchesAct2);
 
             ChunkMatch.UpdateBlockRefs(Chunks.Primary, blockMatchesAct1);
             ChunkMatch.UpdateBlockRefs(Chunks.Act1, blockMatchesAct1);

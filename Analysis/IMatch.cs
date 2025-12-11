@@ -1,8 +1,6 @@
-﻿using ChunkMergeTool.LevelData;
-
-namespace ChunkMergeTool.Analysis
+﻿namespace ChunkMergeTool.Analysis
 {
-    internal interface IMatch<TData> where TData: IData
+    internal interface IMatch<TData>
     {
         TData Data { get; set; }
 

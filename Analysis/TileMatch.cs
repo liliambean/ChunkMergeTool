@@ -60,31 +60,40 @@ namespace ChunkMergeTool.Analysis
                 entry => entry.Value.OrderBy(tile => tiles.IndexOf(tile.Data)).First());
         }
 
-        public static void MarkPrimary(Dictionary<int, TileMatch> matches1, Dictionary<int, TileMatch> matches2)
+        public static (List<TileData>, List<TileData>, List<TileData>) GenerateLists(
+            Dictionary<int, TileMatch> matches1, Dictionary<int, TileMatch> matches2)
         {
             List<TileData> act1 = Utils.CreateShortlist<TileMatch, TileData>(matches1);
             List<TileData> act2 = Utils.CreateShortlist<TileMatch, TileData>(matches2);
+            List<TileData> primary = act1.Where(tile => tile.Pinned == PinnedKind.Primary).ToList();
+            act2.RemoveAll(tile => tile.Pinned == PinnedKind.Primary);
 
-            foreach (TileData tile1 in act1.Where(tile => tile.Pinned != PinnedKind.Act))
+            foreach (TileData tile1 in act1.Where(tile => tile.Pinned == PinnedKind.None))
             {
-                foreach (TileData tile2 in act2.Where(tile => tile.Pinned != PinnedKind.Act))
+                bool isMatch = false;
+
+                foreach (TileData tile2 in act2.Where(tile => tile.Pinned == PinnedKind.None))
                     Utils.ForEachFlipWhere(
                         (xFlip, yFlip) => tile1.Equals(tile2, xFlip, yFlip),
                         (xFlip, yFlip) =>
                         {
                             foreach (TileMatch match in matches2.Values.Where(match => match.Data == tile2))
                             {
+                                match.Data = tile1;
                                 match.XFlip ^= xFlip;
                                 match.YFlip ^= yFlip;
-                                match.Data = tile1;
-                                match.Data.Used = false;
                             }
 
-                            tile1.Primary = true;
+                            isMatch = true;
+                            tile2.Used = false;
                         });
 
                 act2.RemoveAll(tile => !tile.Used);
+                if (isMatch) primary.Add(tile1);
             }
+
+            act1.RemoveAll(primary.Contains);
+            return (primary, act1, act2);
         }
     }
 
