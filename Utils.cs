@@ -79,9 +79,6 @@ namespace ChunkMergeTool
             this BlockData block1, BlockData block2, bool xFlip, bool yFlip,
             Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
         {
-            if (block1.Collision != block2.Collision)
-                return false;
-
             IList<int> lookup;
 
             if (!xFlip && !yFlip) lookup =
@@ -124,6 +121,17 @@ namespace ChunkMergeTool
 
                 if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
                     return false;
+            }
+
+            if (block1.Collision != block2.Collision)
+            {
+                // LBZ2 has a bunch of busted collision, hahaa
+                if (block2.Collision == 0x0000)
+                    block1.Collision = 0x0000;
+                else if (block1.Collision != 0x0000)
+                    block1.Collision = 0xFFFF;
+
+                // return false;
             }
 
             return true;

@@ -66,7 +66,6 @@ namespace ChunkMergeTool.Analysis
             List<TileData> act1 = Utils.CreateShortlist<TileMatch, TileData>(matches1);
             List<TileData> act2 = Utils.CreateShortlist<TileMatch, TileData>(matches2);
             List<TileData> primary = act1.Where(tile => tile.Pinned == PinnedKind.Primary).ToList();
-            act2.RemoveAll(tile => tile.Pinned == PinnedKind.Primary);
 
             foreach (TileData tile1 in act1.Where(tile => tile.Pinned == PinnedKind.None))
             {
@@ -93,6 +92,7 @@ namespace ChunkMergeTool.Analysis
             }
 
             act1.RemoveAll(primary.Contains);
+            act2.RemoveAll(tile => tile.Pinned == PinnedKind.Primary);
             return (primary, act1, act2);
         }
     }
