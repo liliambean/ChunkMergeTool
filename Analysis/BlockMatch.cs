@@ -74,6 +74,10 @@ namespace ChunkMergeTool.Analysis
                 bool isMatch = false;
 
                 foreach (BlockData block2 in act2)
+                {
+                    int index1 = matches1.First(entry => entry.Value.Data == block1).Key;
+                    int index2 = matches2.First(entry => entry.Value.Data == block2).Key;
+
                     Utils.ForEachFlipWhere(
                         (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tiles1, tiles2),
                         (xFlip, yFlip) =>
@@ -88,6 +92,7 @@ namespace ChunkMergeTool.Analysis
                             isMatch = true;
                             block2.Used = false;
                         });
+                }
 
                 act2.RemoveAll(block => !block.Used);
                 if (isMatch) primary.Add(block1);

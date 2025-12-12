@@ -67,6 +67,15 @@ namespace ChunkMergeTool.Analysis
                 bool isMatch = false;
 
                 foreach (ChunkData chunk2 in act2)
+                {
+                    int index1 = matches1.First(entry => entry.Value.Data == chunk1).Key;
+                    int index2 = matches2.First(entry => entry.Value.Data == chunk2).Key;
+
+                    if (index1 == 0x03 && index2 == 0x01)
+                    {
+                        ;
+                    }
+
                     if (chunk1.Equals(chunk2, blocks1, blocks2))
                     {
                         foreach (ChunkMatch match in matches2.Values.Where(match => match.Data == chunk2))
@@ -75,6 +84,7 @@ namespace ChunkMergeTool.Analysis
                         isMatch = true;
                         chunk2.Used = false;
                     }
+                }
 
                 act2.RemoveAll(chunk => !chunk.Used);
                 if (isMatch) primary.Add(chunk1);
