@@ -59,11 +59,11 @@ namespace ChunkMergeTool
 
 
 
-            Dictionary<int, ChunkMatch> chunkMatchesAct1 = ChunkMatch.FindMatches(chunksAct1, blockMatchesAct1);
-            Dictionary<int, ChunkMatch> chunkMatchesAct2 = ChunkMatch.FindMatches(chunksAct2, blockMatchesAct2);
+            Dictionary<int, ChunkMatch> chunkMatchesAct1 = ChunkMatch.FindMatches(chunksAct1, blockMatchesAct1, tileMatchesAct1);
+            Dictionary<int, ChunkMatch> chunkMatchesAct2 = ChunkMatch.FindMatches(chunksAct2, blockMatchesAct2, tileMatchesAct2);
 
             (List<ChunkData> Primary, List<ChunkData> Act1, List<ChunkData> Act2) Chunks
-                = ChunkMatch.GenerateLists(chunkMatchesAct1, chunkMatchesAct2, blockMatchesAct1, blockMatchesAct2);
+                = ChunkMatch.GenerateLists(chunkMatchesAct1, chunkMatchesAct2, blockMatchesAct1, blockMatchesAct2, tileMatchesAct1, tileMatchesAct2);
 
             ChunkMatch.UpdateBlockRefs(Chunks.Primary, blockMatchesAct1);
             ChunkMatch.UpdateBlockRefs(Chunks.Act1, blockMatchesAct1);

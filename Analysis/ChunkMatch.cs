@@ -11,7 +11,7 @@ namespace ChunkMergeTool.Analysis
         public int Id { get; set; }
 
         public static Dictionary<int, ChunkMatch> FindMatches(
-            List<ChunkData> chunks, Dictionary<int, BlockMatch> blocks)
+            List<ChunkData> chunks, Dictionary<int, BlockMatch> blocks, Dictionary<int, TileMatch> tiles)
         {
             Dictionary<int, List<ChunkMatch>> matches = [];
 
@@ -22,7 +22,7 @@ namespace ChunkMergeTool.Analysis
 
                 List<ChunkMatch> chunkMatches = [];
 
-                if (chunk.Equals(chunk, blocks, blocks))
+                if (chunk.Equals(chunk, blocks, blocks, tiles, tiles))
                     chunkMatches.Add(new ChunkMatch(chunk));
 
                 matches[index] = chunkMatches;
@@ -41,7 +41,7 @@ namespace ChunkMergeTool.Analysis
                     List<ChunkMatch> chunk1matches = matches[index1];
                     List<ChunkMatch> chunk2matches = matches[index2];
 
-                    if (chunk1.Equals(chunk2, blocks, blocks))
+                    if (chunk1.Equals(chunk2, blocks, blocks, tiles, tiles))
                     {
                         chunk1matches.Add(new ChunkMatch(chunk2));
                         chunk2matches.Add(new ChunkMatch(chunk1));
@@ -56,7 +56,8 @@ namespace ChunkMergeTool.Analysis
 
         public static (List<ChunkData>, List<ChunkData>, List<ChunkData>) GenerateLists(
             Dictionary<int, ChunkMatch> matches1, Dictionary<int, ChunkMatch> matches2,
-            Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2)
+            Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2,
+            Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
         {
             List<ChunkData> act1 = Utils.CreateShortlist<ChunkMatch, ChunkData>(matches1);
             List<ChunkData> act2 = Utils.CreateShortlist<ChunkMatch, ChunkData>(matches2);
@@ -76,7 +77,7 @@ namespace ChunkMergeTool.Analysis
                         ;
                     }
 
-                    if (chunk1.Equals(chunk2, blocks1, blocks2))
+                    if (chunk1.Equals(chunk2, blocks1, blocks2, tiles1, tiles2))
                     {
                         foreach (ChunkMatch match in matches2.Values.Where(match => match.Data == chunk2))
                             match.Data = chunk1;

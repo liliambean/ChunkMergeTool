@@ -52,7 +52,8 @@ namespace ChunkMergeTool
 
         public static bool Equals(
             this ChunkData chunk1, ChunkData chunk2,
-            Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2)
+            Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2,
+            Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
         {
             for (int index = 0; index < ChunkSize; index++)
             {
@@ -62,14 +63,22 @@ namespace ChunkMergeTool
                 if (blockRef1.SolidLayerA != blockRef2.SolidLayerA || blockRef1.SolidLayerB != blockRef2.SolidLayerB)
                     return false;
 
-                if (blockRef1.XFlip != blockRef2.XFlip || blockRef1.YFlip != blockRef2.YFlip)
-                    return false;
-
                 BlockMatch match1 = blocks1[blockRef1.Id];
                 BlockMatch match2 = blocks2[blockRef2.Id];
 
-                if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
+                //if (!match1.Data.Equals(match2.Data, blockRef1.XFlip ^ blockRef2.XFlip, blockRef1.YFlip ^ blockRef2.YFlip, tiles1, tiles2))
+                //    return false;
+
+                if (match1.Data != match2.Data)
                     return false;
+
+                //bool blockRef1_XFlip = blockRef1.XFlip ^ match1.XFlip;
+                //bool blockRef1_YFlip = blockRef1.YFlip ^ match1.YFlip;
+                //bool blockRef2_XFlip = blockRef2.XFlip ^ match2.XFlip;
+                //bool blockRef2_YFlip = blockRef2.YFlip ^ match2.YFlip;
+
+                //if (blockRef1_XFlip != blockRef2_XFlip || blockRef1_YFlip != blockRef2_YFlip)
+                //    return false;
             }
 
             return true;
@@ -119,7 +128,13 @@ namespace ChunkMergeTool
                 TileMatch match1 = tiles1[tileRef1.Id];
                 TileMatch match2 = tiles2[tileRef2.Id];
 
-                if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
+                //if (!match1.Data.Equals(match2.Data, tileRef1.XFlip ^ tileRef2_XFlip, tileRef1.YFlip ^ tileRef2_YFlip))
+                //    return false;
+
+                if (match1.Data != match2.Data)
+                    return false;
+
+                if (match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
                     return false;
             }
 
