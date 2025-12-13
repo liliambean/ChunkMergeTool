@@ -57,13 +57,16 @@ namespace ChunkMergeTool
                 if (blockRef1.SolidLayerA != blockRef2.SolidLayerA || blockRef1.SolidLayerB != blockRef2.SolidLayerB)
                     return false;
 
-                if (blockRef1.XFlip != blockRef2.XFlip || blockRef1.YFlip != blockRef2.YFlip)
-                    return false;
-
                 IdMatch match1 = blockIds1[blockRef1.Id];
                 IdMatch match2 = blockIds2[blockRef2.Id];
 
-                if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
+                if (match1.Id != match2.Id)
+                    return false;
+
+                bool match2_XFlip = blockRef1.XFlip ^ blockRef2.XFlip ^ match2.XFlip;
+                bool match2_YFlip = blockRef1.YFlip ^ blockRef2.YFlip ^ match2.YFlip;
+
+                if (match1.XFlip != match2_XFlip || match1.YFlip != match2_YFlip)
                     return false;
             }
 
@@ -104,16 +107,16 @@ namespace ChunkMergeTool
                 if (tileRef1.Palette != tileRef2.Palette || tileRef1.Priority != tileRef2.Priority)
                     return false;
 
-                bool tileRef2_XFlip = tileRef2.XFlip ^ xFlip;
-                bool tileRef2_YFlip = tileRef2.YFlip ^ yFlip;
-
-                if (tileRef1.XFlip != tileRef2_XFlip || tileRef1.YFlip != tileRef2_YFlip)
-                    return false;
-
                 IdMatch match1 = tileIds1[tileRef1.Id];
                 IdMatch match2 = tileIds2[tileRef2.Id];
 
-                if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
+                if (match1.Id != match2.Id)
+                    return false;
+
+                bool match2_XFlip = tileRef1.XFlip ^ tileRef2.XFlip ^ match2.XFlip ^ xFlip;
+                bool match2_YFlip = tileRef1.YFlip ^ tileRef2.YFlip ^ match2.YFlip ^ yFlip;
+
+                if (match1.XFlip != match2_XFlip || match1.YFlip != match2_YFlip)
                     return false;
             }
 
