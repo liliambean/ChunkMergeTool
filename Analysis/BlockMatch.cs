@@ -14,7 +14,7 @@ namespace ChunkMergeTool.Analysis
 
         public int Id { get; set; }
 
-        public static Dictionary<int, BlockMatch> FindMatches(List<BlockData> blocks, Dictionary<int, TileMatch> tiles)
+        public static Dictionary<int, BlockMatch> FindDuplicatesInAct(List<BlockData> blocks, Dictionary<int, TileMatch> tiles)
         {
             Dictionary<int, List<BlockMatch>> matches = [];
 
@@ -61,7 +61,7 @@ namespace ChunkMergeTool.Analysis
                 entry => entry.Value.OrderBy(block => blocks.IndexOf(block.Data)).First());
         }
 
-        public static (List<BlockData>, List<BlockData>, List<BlockData>) GenerateLists(
+        public static (List<BlockData>, List<BlockData>, List<BlockData>) FindDuplicatesAcrossActs(
             Dictionary<int, BlockMatch> matches1, Dictionary<int, BlockMatch> matches2,
             Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
         {
@@ -95,18 +95,6 @@ namespace ChunkMergeTool.Analysis
 
             act1.RemoveAll(primary.Contains);
             return (primary, act1, act2);
-        }
-
-        public static void UpdateTileRefs(List<BlockData> blocks, Dictionary<int, TileMatch> matches)
-        {
-            foreach (BlockData block in blocks)
-                foreach (TileRef tileRef in block.Definition)
-                {
-                    TileMatch match = matches[tileRef.Id];
-                    tileRef.Id = match.Id;
-                    tileRef.XFlip ^= match.XFlip;
-                    tileRef.YFlip ^= match.YFlip;
-                }
         }
     }
 

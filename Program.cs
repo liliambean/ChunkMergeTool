@@ -29,48 +29,51 @@ namespace ChunkMergeTool
 
 
 
-            Dictionary<int, TileMatch> tileMatchesAct1 = TileMatch.FindMatches(tilesAct1);
-            Dictionary<int, TileMatch> tileMatchesAct2 = TileMatch.FindMatches(tilesAct2);
+            Dictionary<int, TileMatch> tileMatchesAct1 = TileMatch.FindDuplicatesInAct(tilesAct1);
+            Dictionary<int, TileMatch> tileMatchesAct2 = TileMatch.FindDuplicatesInAct(tilesAct2);
 
             (List<TileData> Primary, List<TileData> Act1, List<TileData> Act2) Tiles
-                = TileMatch.GenerateLists(tileMatchesAct1, tileMatchesAct2);
+                = TileMatch.FindDuplicatesAcrossActs(tileMatchesAct1, tileMatchesAct2);
 
             TileData.EnsurePinned(Tiles.Primary, 0);
             TileData.EnsurePinned(Tiles.Act1, Tiles.Primary.Count);
             TileData.EnsurePinned(Tiles.Act2, Tiles.Primary.Count);
 
-            Utils.EnsureIds(Tiles.Primary.Concat(Tiles.Act1).ToList(), tileMatchesAct1);
-            Utils.EnsureIds(Tiles.Primary.Concat(Tiles.Act2).ToList(), tileMatchesAct2);
+            Utils.GenerateIds(Tiles.Primary.Concat(Tiles.Act1).ToList(), tileMatchesAct1);
+            Utils.GenerateIds(Tiles.Primary.Concat(Tiles.Act2).ToList(), tileMatchesAct2);
 
 
 
-            Dictionary<int, BlockMatch> blockMatchesAct1 = BlockMatch.FindMatches(blocksAct1, tileMatchesAct1);
-            Dictionary<int, BlockMatch> blockMatchesAct2 = BlockMatch.FindMatches(blocksAct2, tileMatchesAct2);
+            Dictionary<int, BlockMatch> blockMatchesAct1 = BlockMatch.FindDuplicatesInAct(blocksAct1, tileMatchesAct1);
+            Dictionary<int, BlockMatch> blockMatchesAct2 = BlockMatch.FindDuplicatesInAct(blocksAct2, tileMatchesAct2);
 
             (List<BlockData> Primary, List<BlockData> Act1, List<BlockData> Act2) Blocks
-                = BlockMatch.GenerateLists(blockMatchesAct1, blockMatchesAct2, tileMatchesAct1, tileMatchesAct2);
+                = BlockMatch.FindDuplicatesAcrossActs(blockMatchesAct1, blockMatchesAct2, tileMatchesAct1, tileMatchesAct2);
 
-            BlockMatch.UpdateTileRefs(Blocks.Primary, tileMatchesAct1);
-            BlockMatch.UpdateTileRefs(Blocks.Act1, tileMatchesAct1);
-            BlockMatch.UpdateTileRefs(Blocks.Act2, tileMatchesAct2);
+            Utils.UpdateTileRefs(Blocks.Primary, tileMatchesAct1);
+            Utils.UpdateTileRefs(Blocks.Act1, tileMatchesAct1);
+            Utils.UpdateTileRefs(Blocks.Act2, tileMatchesAct2);
 
-            List<BlockData> collisionAct1 = Utils.EnsureIds(Blocks.Primary.Concat(Blocks.Act1).ToList(), blockMatchesAct1);
-            List<BlockData> collisionAct2 = Utils.EnsureIds(Blocks.Primary.Concat(Blocks.Act2).ToList(), blockMatchesAct2);
+            List<BlockData> collisionAct1 = Blocks.Primary.Concat(Blocks.Act1).ToList();
+            List<BlockData> collisionAct2 = Blocks.Primary.Concat(Blocks.Act2).ToList();
+
+            Utils.GenerateIds(collisionAct1, blockMatchesAct1);
+            Utils.GenerateIds(collisionAct2, blockMatchesAct2);
 
 
 
-            Dictionary<int, ChunkMatch> chunkMatchesAct1 = ChunkMatch.FindMatches(chunksAct1, blockMatchesAct1);
-            Dictionary<int, ChunkMatch> chunkMatchesAct2 = ChunkMatch.FindMatches(chunksAct2, blockMatchesAct2);
+            Dictionary<int, ChunkMatch> chunkMatchesAct1 = ChunkMatch.FindDuplicatesInAct(chunksAct1, blockMatchesAct1);
+            Dictionary<int, ChunkMatch> chunkMatchesAct2 = ChunkMatch.FindDuplicatesInAct(chunksAct2, blockMatchesAct2);
 
             (List<ChunkData> Primary, List<ChunkData> Act1, List<ChunkData> Act2) Chunks
-                = ChunkMatch.GenerateLists(chunkMatchesAct1, chunkMatchesAct2, blockMatchesAct1, blockMatchesAct2);
+                = ChunkMatch.FindDuplicatesAcrossActs(chunkMatchesAct1, chunkMatchesAct2, blockMatchesAct1, blockMatchesAct2);
 
-            ChunkMatch.UpdateBlockRefs(Chunks.Primary, blockMatchesAct1);
-            ChunkMatch.UpdateBlockRefs(Chunks.Act1, blockMatchesAct1);
-            ChunkMatch.UpdateBlockRefs(Chunks.Act2, blockMatchesAct2);
+            Utils.UpdateBlockRefs(Chunks.Primary, blockMatchesAct1);
+            Utils.UpdateBlockRefs(Chunks.Act1, blockMatchesAct1);
+            Utils.UpdateBlockRefs(Chunks.Act2, blockMatchesAct2);
 
-            Utils.EnsureIds(Chunks.Primary.Concat(Chunks.Act1).ToList(), chunkMatchesAct1);
-            Utils.EnsureIds(Chunks.Primary.Concat(Chunks.Act2).ToList(), chunkMatchesAct2);
+            Utils.GenerateIds(Chunks.Primary.Concat(Chunks.Act1).ToList(), chunkMatchesAct1);
+            Utils.GenerateIds(Chunks.Primary.Concat(Chunks.Act2).ToList(), chunkMatchesAct2);
 
 
 

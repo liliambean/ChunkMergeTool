@@ -12,7 +12,7 @@ namespace ChunkMergeTool.Analysis
 
         public int Id { get; set; }
 
-        public static Dictionary<int, TileMatch> FindMatches(List<TileData> tiles)
+        public static Dictionary<int, TileMatch> FindDuplicatesInAct(List<TileData> tiles)
         {
             Dictionary<int, List<TileMatch>> matches = [];
 
@@ -60,7 +60,7 @@ namespace ChunkMergeTool.Analysis
                 entry => entry.Value.OrderBy(tile => tiles.IndexOf(tile.Data)).First());
         }
 
-        public static (List<TileData>, List<TileData>, List<TileData>) GenerateLists(
+        public static (List<TileData>, List<TileData>, List<TileData>) FindDuplicatesAcrossActs(
             Dictionary<int, TileMatch> matches1, Dictionary<int, TileMatch> matches2)
         {
             List<TileData> act1 = Utils.CreateShortlist<TileMatch, TileData>(matches1);

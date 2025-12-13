@@ -37,11 +37,6 @@ namespace ChunkMergeTool
         public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
         public static readonly Range PinnedTilesAct2 = new(0x2C3, 0x2E4);
 
-        public static int ReadWord(FileStream file)
-        {
-            return (file.ReadByte() << 8) | file.ReadByte();
-        }
-
         public static void ForEachFlipWhere(Func<bool, bool, bool> predicate, Action<bool, bool> callback)
         {
             if (predicate(false, false)) callback(false, false);
@@ -210,19 +205,49 @@ namespace ChunkMergeTool
                 .ToList();
         }
 
-        public static List<TData> EnsureIds<TMatch, TData>(List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData>
+        public static void UpdateTileRefs(List<BlockData> blocks, Dictionary<int, TileMatch> matches)
         {
-            foreach (TMatch match in matches.Values)
-                match.Id = data.IndexOf(match.Data);
+            foreach (BlockData block in blocks)
+                foreach (TileRef tileRef in block.Definition)
+                {
+                    TileMatch match = matches[tileRef.Id];
+                    tileRef.Id = match.Id;
+                    tileRef.XFlip ^= match.XFlip;
+                    tileRef.YFlip ^= match.YFlip;
+                }
+        }
 
-            return data;
+        public static void UpdateBlockRefs(List<ChunkData> chunks, Dictionary<int, BlockMatch> matches)
+        {
+            foreach (ChunkData chunk in chunks)
+                foreach (BlockRef blockRef in chunk.Definition)
+                {
+                    BlockMatch match = matches[blockRef.Id];
+                    blockRef.Id = match.Id;
+                    blockRef.XFlip ^= match.XFlip;
+                    blockRef.YFlip ^= match.YFlip;
+                }
         }
 
         public static void UpdateChunkRefs(LayoutData layout, Dictionary<int, ChunkMatch> matches)
         {
             foreach (byte[] layoutRow in layout.Rows)
                 for (int index = 0; index < layoutRow.Length; index++)
-                    layoutRow[index] = (byte)matches[layoutRow[index]].Id;
+                {
+                    ChunkMatch match = matches[layoutRow[index]];
+                    layoutRow[index] = (byte)match.Id;
+                }
+        }
+
+        public static void GenerateIds<TMatch, TData>(List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData>
+        {
+            foreach (TMatch match in matches.Values)
+                match.Id = data.IndexOf(match.Data);
+        }
+
+        public static int ReadWord(FileStream file)
+        {
+            return (file.ReadByte() << 8) | file.ReadByte();
         }
 
         public static IEnumerable<byte> ToBytes(this IEnumerable<int> words)
