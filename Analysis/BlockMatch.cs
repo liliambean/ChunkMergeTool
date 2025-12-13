@@ -10,11 +10,7 @@ namespace ChunkMergeTool.Analysis
 
         public bool YFlip { get; set; } = yFlip;
 
-        public bool Primary { get; set; }
-
-        public int Id { get; set; }
-
-        public static Dictionary<int, BlockMatch> FindDuplicatesInAct(List<BlockData> blocks, Dictionary<int, TileMatch> tiles)
+        public static Dictionary<int, BlockMatch> FindDuplicatesInAct(List<BlockData> blocks, Dictionary<int, IdMatch> tileIds)
         {
             Dictionary<int, List<BlockMatch>> matches = [];
 
@@ -26,7 +22,7 @@ namespace ChunkMergeTool.Analysis
                 List<BlockMatch> blockMatches = [];
 
                 Utils.ForEachFlipWhere(
-                    (xFlip, yFlip) => block.Equals(block, xFlip, yFlip, tiles, tiles),
+                    (xFlip, yFlip) => block.Equals(block, xFlip, yFlip, tileIds, tileIds),
                     (xFlip, yFlip) => blockMatches.Add(new BlockMatch(block, xFlip, yFlip))
                 );
 
@@ -47,7 +43,7 @@ namespace ChunkMergeTool.Analysis
                     List<BlockMatch> block2matches = matches[index2];
 
                     Utils.ForEachFlipWhere(
-                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tiles, tiles),
+                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tileIds, tileIds),
                         (xFlip, yFlip) =>
                         {
                             block1matches.Add(new BlockMatch(block2, xFlip, yFlip));
@@ -63,7 +59,7 @@ namespace ChunkMergeTool.Analysis
 
         public static (List<BlockData>, List<BlockData>, List<BlockData>) FindDuplicatesAcrossActs(
             Dictionary<int, BlockMatch> matches1, Dictionary<int, BlockMatch> matches2,
-            Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
+            Dictionary<int, IdMatch> tileIds1, Dictionary<int, IdMatch> tileIds2)
         {
             List<BlockData> act1 = Utils.CreateShortlist<BlockMatch, BlockData>(matches1);
             List<BlockData> act2 = Utils.CreateShortlist<BlockMatch, BlockData>(matches2);
@@ -75,7 +71,7 @@ namespace ChunkMergeTool.Analysis
 
                 foreach (BlockData block2 in act2)
                     Utils.ForEachFlipWhere(
-                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tiles1, tiles2),
+                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tileIds1, tileIds2),
                         (xFlip, yFlip) =>
                         {
                             foreach (BlockMatch match in matches2.Values.Where(match => match.Data == block2))

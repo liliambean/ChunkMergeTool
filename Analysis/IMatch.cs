@@ -2,8 +2,11 @@
 {
     internal interface IMatch<TData>
     {
-        TData Data { get; set; }
+        TData Data { get; }
 
-        int Id { get; set; }
+        public bool XFlip { get; }
+
+        public bool YFlip { get; }
     }
+
 }

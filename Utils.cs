@@ -2,6 +2,7 @@
 using ChunkMergeTool.LevelData;
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ChunkMergeTool
 {
@@ -45,9 +46,8 @@ namespace ChunkMergeTool
             if (predicate(true, true)) callback(true, true);
         }
 
-        public static bool Equals(
-            this ChunkData chunk1, ChunkData chunk2,
-            Dictionary<int, BlockMatch> blocks1, Dictionary<int, BlockMatch> blocks2)
+        public static bool Equals(this ChunkData chunk1,
+            ChunkData chunk2, Dictionary<int, IdMatch> blockIds1, Dictionary<int, IdMatch> blockIds2)
         {
             for (int index = 0; index < ChunkSize; index++)
             {
@@ -60,8 +60,8 @@ namespace ChunkMergeTool
                 if (blockRef1.XFlip != blockRef2.XFlip || blockRef1.YFlip != blockRef2.YFlip)
                     return false;
 
-                BlockMatch match1 = blocks1[blockRef1.Id];
-                BlockMatch match2 = blocks2[blockRef2.Id];
+                IdMatch match1 = blockIds1[blockRef1.Id];
+                IdMatch match2 = blockIds2[blockRef2.Id];
 
                 if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
                     return false;
@@ -70,9 +70,8 @@ namespace ChunkMergeTool
             return true;
         }
 
-        public static bool Equals(
-            this BlockData block1, BlockData block2, bool xFlip, bool yFlip,
-            Dictionary<int, TileMatch> tiles1, Dictionary<int, TileMatch> tiles2)
+        public static bool Equals(this BlockData block1,
+            BlockData block2, bool xFlip, bool yFlip, Dictionary<int, IdMatch> tileIds1, Dictionary<int, IdMatch> tileIds2)
         {
             IList<int> lookup;
 
@@ -111,8 +110,8 @@ namespace ChunkMergeTool
                 if (tileRef1.XFlip != tileRef2_XFlip || tileRef1.YFlip != tileRef2_YFlip)
                     return false;
 
-                TileMatch match1 = tiles1[tileRef1.Id];
-                TileMatch match2 = tiles2[tileRef2.Id];
+                IdMatch match1 = tileIds1[tileRef1.Id];
+                IdMatch match2 = tileIds2[tileRef2.Id];
 
                 if (match1.Id != match2.Id || match1.XFlip != match2.XFlip || match1.YFlip != match2.YFlip)
                     return false;
@@ -205,44 +204,47 @@ namespace ChunkMergeTool
                 .ToList();
         }
 
-        public static void UpdateTileRefs(List<BlockData> blocks, Dictionary<int, TileMatch> matches)
+        public static void UpdateTileRefs(List<BlockData> blocks, Dictionary<int, IdMatch> tileIds)
         {
             foreach (BlockData block in blocks)
                 foreach (TileRef tileRef in block.Definition)
                 {
-                    TileMatch match = matches[tileRef.Id];
+                    IdMatch match = tileIds[tileRef.Id];
                     tileRef.Id = match.Id;
                     tileRef.XFlip ^= match.XFlip;
                     tileRef.YFlip ^= match.YFlip;
                 }
         }
 
-        public static void UpdateBlockRefs(List<ChunkData> chunks, Dictionary<int, BlockMatch> matches)
+        public static void UpdateBlockRefs(List<ChunkData> chunks, Dictionary<int, IdMatch> blockIds)
         {
             foreach (ChunkData chunk in chunks)
                 foreach (BlockRef blockRef in chunk.Definition)
                 {
-                    BlockMatch match = matches[blockRef.Id];
+                    IdMatch match = blockIds[blockRef.Id];
                     blockRef.Id = match.Id;
                     blockRef.XFlip ^= match.XFlip;
                     blockRef.YFlip ^= match.YFlip;
                 }
         }
 
-        public static void UpdateChunkRefs(LayoutData layout, Dictionary<int, ChunkMatch> matches)
+        public static void UpdateChunkRefs(LayoutData layout, Dictionary<int, IdMatch> chunkIds)
         {
             foreach (byte[] layoutRow in layout.Rows)
                 for (int index = 0; index < layoutRow.Length; index++)
                 {
-                    ChunkMatch match = matches[layoutRow[index]];
+                    IdMatch match = chunkIds[layoutRow[index]];
                     layoutRow[index] = (byte)match.Id;
                 }
         }
 
-        public static void GenerateIds<TMatch, TData>(List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData>
+        public static Dictionary<int, IdMatch> GenerateIds<TMatch, TData>(
+            List<TData> data, Dictionary<int, TMatch> matches) where TMatch : IMatch<TData>
         {
-            foreach (TMatch match in matches.Values)
-                match.Id = data.IndexOf(match.Data);
+            return matches.ToDictionary(entry => entry.Key, entry => new IdMatch(
+                data.IndexOf(entry.Value.Data),
+                entry.Value.XFlip,
+                entry.Value.YFlip));
         }
 
         public static int ReadWord(FileStream file)

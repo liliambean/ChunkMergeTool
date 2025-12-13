@@ -10,8 +10,6 @@ namespace ChunkMergeTool.Analysis
 
         public bool YFlip { get; set; } = yFlip;
 
-        public int Id { get; set; }
-
         public static Dictionary<int, TileMatch> FindDuplicatesInAct(List<TileData> tiles)
         {
             Dictionary<int, List<TileMatch>> matches = [];
