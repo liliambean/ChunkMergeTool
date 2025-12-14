@@ -56,7 +56,7 @@
 
         public static void MarkUsedAndLoadCollision(List<ChunkData> chunks, List<BlockData> blocks, string filename)
         {
-            foreach (ChunkData chunk in chunks)
+            foreach (ChunkData chunk in chunks.Where(chunk => chunk.Used))
                 foreach (BlockRef block in chunk.Definition)
                     blocks[block.Id].Used = true;
 

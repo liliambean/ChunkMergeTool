@@ -42,13 +42,14 @@
             Utils.ProcessKosFile(uncompressed, compressed, moduled: true, extract: false);
         }
 
-        public static void MarkUsedAndPinned(List<BlockData> blocks, List<TileData> tiles, List<Range> rangePrimary, Range rangeAct)
+        public static void MarkUsedAndPinned(
+            List<BlockData> blocks, List<TileData> tiles, Range rangeObject, Range rangePrimary, Range rangeAct)
         {
-            foreach (BlockData block in blocks)
+            foreach (BlockData block in blocks.Where(block => block.Used))
                 foreach (TileRef tile in block.Definition)
                     tiles[tile.Id].Used = true;
 
-            foreach (Range range in rangePrimary)
+            foreach (Range range in new[] { rangeObject, rangePrimary })
                 for (int id = range.Start.Value; id <= range.End.Value; id++)
                 {
                     TileData tile = tiles[id];

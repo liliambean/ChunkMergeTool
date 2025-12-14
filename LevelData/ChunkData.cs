@@ -6,6 +6,8 @@
 
         public bool Used { get; set; }
 
+        public int PinnedId { get; set; }
+
         public byte[] Bytes => Definition.Select(blockRef => blockRef.Word).ToBytes().ToArray();
 
         public static List<ChunkData> Load(string filename)
@@ -53,6 +55,39 @@
 
             foreach (byte chunkId in usedIds)
                 chunks[chunkId].Used = true;
+        }
+
+        public static void MarkPinned(List<ChunkData> chunks, Dictionary<int, int> pinnedIds)
+        {
+            foreach (KeyValuePair<int, int> entry in pinnedIds)
+            {
+                ChunkData chunk = chunks[entry.Key];
+                chunk.Used = true;
+                chunk.PinnedId = entry.Value;
+            }
+        }
+
+        public static void EnsurePinned(List<ChunkData> chunks, int firstId)
+        {
+            if (firstId < 0)
+            {
+                int insertCount = chunks.Max(chunk => chunk.PinnedId) - chunks.Count + 1;
+                if (insertCount > 0)
+                    chunks.AddRange(Enumerable.Repeat(chunks[0], insertCount));
+
+                firstId = 0;
+            }
+
+            List<ChunkData> pinned = chunks.Where(chunk => chunk.PinnedId > 0).OrderBy(chunk => chunk.PinnedId).ToList();
+
+            foreach (ChunkData chunk in pinned)
+                chunks.Remove(chunk);
+
+            foreach (ChunkData chunk in pinned)
+            {
+                int index = chunk.PinnedId - firstId;
+                chunks.Insert(index, chunk);
+            }
         }
     }
 

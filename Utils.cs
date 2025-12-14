@@ -12,10 +12,6 @@ namespace ChunkMergeTool
         public const int TileSize = 0x20;
 
         public const string WorkingDir = @"D:\s3unlocked\Levels\LBZ\Chunks";
-
-        public const string FileBlocksReport = @"blocks.txt";
-        public const string FileChunksReport = @"chunks.txt";
-
         public const string FileLayoutAct1 = @"..\Layout\1.bin";
         public const string FileLayoutAct2 = @"..\Layout\2.bin";
         public const string FileCollisionAct1 = @"..\Collision\1.bin";
@@ -24,21 +20,54 @@ namespace ChunkMergeTool
         public const string FileChunksPrimary = @"Primary";
         public const string FileChunksAct1 = @"Act 1";
         public const string FileChunksAct2 = @"Act 2";
+        public const string FileChunksDeathEgg = @"Act 2 Death Egg";
+
         public const string FileBlocksPrimary = @"..\Blocks\Primary";
         public const string FileBlocksAct1 = @"..\Blocks\Act 1 Secondary";
         public const string FileBlocksAct2 = @"..\Blocks\Act 2 Secondary";
+        public const string FileBlocksDeathEgg = @"..\Blocks\Act 2 Death Egg";
+
         public const string FileTilesPrimary = @"..\Tiles\Primary";
         public const string FileTilesAct1 = @"..\Tiles\Act 1 Secondary";
         public const string FileTilesAct2 = @"..\Tiles\Act 2 Secondary";
+        public const string FileTilesDeathEgg = @"..\Tiles\Act 2 Death Egg";
+
+        public static readonly Dictionary<int, int> DeathEggChunkIDsFG = new()
+        {
+            { 0x00, 0x00 },
+            { 0x83, 0xB2 }, { 0x84, 0xB3 }, { 0x85, 0xB4 }, { 0x86, 0xA2 }, { 0x87, 0xA3 },
+            { 0x88, 0xA0 }, { 0x89, 0xA1 }, { 0x8A, 0xB0 }, { 0x8B, 0xB1 },
+            { 0x8D, 0xBC }, { 0x8E, 0xAA }, { 0x8F, 0xAB }, { 0x90, 0xA8 }, { 0x91, 0xA9 },
+
+            { 0x95, 0xB5 }, { 0x96, 0xB6 }, { 0x97, 0xB7 }, { 0x98, 0xA4 }, { 0x99, 0xA5 },
+            { 0x9A, 0xA6 }, { 0x9B, 0xA7 },                 { 0x9D, 0xBD }, { 0x9E, 0xBE },
+            { 0x9F, 0xBF }, { 0xA0, 0xAC }, { 0xA1, 0xAD }, { 0xA2, 0xAE }, { 0xA3, 0xAF },
+            { 0xA4, 0xB8 }, { 0xA5, 0xB9 }, { 0xA6, 0xBA }, { 0xA7, 0xBB },
+        };
+
+        public static readonly Dictionary<int, int> DeathEggChunkIDsBG = new()
+        {
+            { 0xB4, 0xC0 }, { 0xB5, 0xC1 },
+
+            { 0xE0, 0xC6 }, { 0xE1, 0xC7 }, { 0xE2, 0xC8 }, { 0xE3, 0xC9 }, { 0xE4, 0xCA },
+            { 0xE5, 0xCB }, { 0xE6, 0xCC }, { 0xE7, 0xCD }, { 0xE8, 0xCE }, { 0xE9, 0xCF },
+            { 0xEA, 0xD0 }, { 0xEB, 0xD1 }, { 0xEC, 0xD2 }, { 0xED, 0xD3 },
+            { 0xEF, 0xD4 },
+
+            { 0xF0, 0xD5 }, { 0xF1, 0xD6 },
+            { 0xF6, 0xD7 }, { 0xF7, 0xC5 },
+        };
 
         public static readonly List<byte> EventChunkIDsAct1 = [0xDA];
         public static readonly List<byte> EventChunkIDsAct2 = [0xA6, 0xA7];
         public static readonly List<byte> UseAct1CollisionForChunkIDs = [0x41, 0x42];
         public static readonly List<byte> UseAct2CollisionForChunkIDs = [0x27, 0x4D, 0x4E, 0x4F, 0x64, 0x6E, 0xD1, 0xDF];
 
-        public static readonly List<Range> PinnedTilesPrimary = [new(0, 0x48), new(0x160, 0x178)];
+        public static readonly Range PinnedTilesObjects = new(0, 0x48);
+        public static readonly Range PinnedTilesPrimary = new(0x160, 0x178);
         public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
         public static readonly Range PinnedTilesAct2 = new(0x2C3, 0x2E4);
+        public static readonly Range PinnedTilesNone = new(1, 0);
 
         public static void ForEachFlipWhere(Func<bool, bool, bool> predicate, Action<bool, bool> callback)
         {
