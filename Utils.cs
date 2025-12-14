@@ -2,7 +2,6 @@
 using ChunkMergeTool.LevelData;
 using System.Diagnostics;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace ChunkMergeTool
 {
@@ -34,6 +33,9 @@ namespace ChunkMergeTool
 
         public static readonly List<byte> EventChunkIDsAct1 = [0xDA];
         public static readonly List<byte> EventChunkIDsAct2 = [0xA6, 0xA7];
+        public static readonly List<byte> UseAct1CollisionForChunkIDs = [0x41, 0x42];
+        public static readonly List<byte> UseAct2CollisionForChunkIDs = [0x27, 0x4D, 0x4E, 0x4F, 0x64, 0x6E, 0xD1, 0xDF];
+
         public static readonly List<Range> PinnedTilesPrimary = [new(0, 0x48), new(0x160, 0x178)];
         public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
         public static readonly Range PinnedTilesAct2 = new(0x2C3, 0x2E4);
@@ -47,6 +49,7 @@ namespace ChunkMergeTool
         }
 
         public static bool Equals(this ChunkData chunk1, ChunkData chunk2,
+            Dictionary<int, List<ChunkMatch>> matches1, Dictionary<int, List<ChunkMatch>> matches2,
             Dictionary<int, List<IdMatch>> blockIds1, Dictionary<int, List<IdMatch>> blockIds2)
         {
             for (int index = 0; index < ChunkSize; index++)
@@ -54,12 +57,40 @@ namespace ChunkMergeTool
                 BlockRef blockRef1 = chunk1.Definition[index];
                 BlockRef blockRef2 = chunk2.Definition[index];
 
-                if (blockRef1.SolidLayerA != blockRef2.SolidLayerA || blockRef1.SolidLayerB != blockRef2.SolidLayerB)
-                    return false;
-
                 if (!DeepEquals(blockIds1[blockRef1.Id], blockIds2[blockRef2.Id],
                     blockRef1.XFlip ^ blockRef2.XFlip, blockRef1.YFlip ^ blockRef2.YFlip))
                     return false;
+            }
+
+            for (int index = 0; index < ChunkSize; index++)
+            {
+                BlockRef blockRef1 = chunk1.Definition[index];
+                BlockRef blockRef2 = chunk2.Definition[index];
+
+                if (blockRef1.SolidLayerA != blockRef2.SolidLayerA || blockRef1.SolidLayerB != blockRef2.SolidLayerB)
+                {
+                    // LBZ2 has a bunch of busted collision.
+                    if (blockIds1 == blockIds2)
+                        return false;
+
+                    int index1 = matches1.First(e => e.Value.Any(m => m.Data == chunk1)).Key;
+                    if (UseAct1CollisionForChunkIDs.Contains((byte)index1))
+                    {
+                        blockRef2.SolidLayerA = blockRef1.SolidLayerA;
+                        blockRef2.SolidLayerB = blockRef1.SolidLayerB;
+                        continue;
+                    }
+
+                    int index2 = matches2.First(e => e.Value.Any(m => m.Data == chunk2)).Key;
+                    if (UseAct2CollisionForChunkIDs.Contains((byte)index2))
+                    {
+                        blockRef1.SolidLayerA = blockRef2.SolidLayerA;
+                        blockRef1.SolidLayerB = blockRef2.SolidLayerB;
+                        continue;
+                    }
+
+                    return false;
+                }
             }
 
             return true;
@@ -106,13 +137,13 @@ namespace ChunkMergeTool
 
             if (block1.Collision != block2.Collision)
             {
-                // LBZ2 has a bunch of busted collision, hahaa
+                // LBZ2 has a bunch of busted collision.
+                // return false;
+
                 if (block2.Collision == 0x0000)
                     block1.Collision = 0x0000;
                 else if (block1.Collision != 0x0000)
                     block1.Collision = 0xFFFF;
-
-                // return false;
             }
 
             return true;

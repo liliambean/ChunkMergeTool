@@ -23,7 +23,7 @@ namespace ChunkMergeTool.Analysis
 
                 List<ChunkMatch> chunkMatches = [];
 
-                if (chunk.Equals(chunk, blockIds, blockIds))
+                if (chunk.Equals(chunk, matches, matches, blockIds, blockIds))
                     chunkMatches.Add(new ChunkMatch(index, chunk));
 
                 matches[index] = chunkMatches;
@@ -42,7 +42,7 @@ namespace ChunkMergeTool.Analysis
                     List<ChunkMatch> chunk1matches = matches[index1];
                     List<ChunkMatch> chunk2matches = matches[index2];
 
-                    if (chunk1.Equals(chunk2, blockIds, blockIds))
+                    if (chunk1.Equals(chunk2, matches, matches, blockIds, blockIds))
                     {
                         chunk1matches.Add(new ChunkMatch(index2, chunk2));
                         chunk2matches.Add(new ChunkMatch(index1, chunk1));
@@ -66,7 +66,7 @@ namespace ChunkMergeTool.Analysis
                 bool isMatch = false;
 
                 foreach (ChunkData chunk2 in act2)
-                    if (chunk1.Equals(chunk2, blockIds1, blockIds2))
+                    if (chunk1.Equals(chunk2, matches1, matches2, blockIds1, blockIds2))
                     {
                         foreach (ChunkMatch match in matches2.SelectMany(entry => entry.Value).Where(match => match.Data == chunk2))
                             match.Data = chunk1;
