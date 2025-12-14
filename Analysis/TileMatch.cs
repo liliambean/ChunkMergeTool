@@ -2,15 +2,17 @@
 
 namespace ChunkMergeTool.Analysis
 {
-    internal class TileMatch(TileData tile, bool xFlip, bool yFlip) : IMatch<TileData>
+    internal class TileMatch(int id, TileData tile, bool xFlip, bool yFlip) : IMatch<TileData>
     {
+        public int Id { get; set; } = id;
+
         public TileData Data { get; set; } = tile;
 
         public bool XFlip { get; set; } = xFlip;
 
         public bool YFlip { get; set; } = yFlip;
 
-        public static Dictionary<int, TileMatch> FindDuplicatesInAct(List<TileData> tiles)
+        public static Dictionary<int, List<TileMatch>> FindDuplicatesInAct(List<TileData> tiles)
         {
             Dictionary<int, List<TileMatch>> matches = [];
 
@@ -23,7 +25,7 @@ namespace ChunkMergeTool.Analysis
 
                 Utils.ForEachFlipWhere(
                     (xFlip, yFlip) => tile.Equals(tile, xFlip, yFlip),
-                    (xFlip, yFlip) => tileMatches.Add(new TileMatch(tile, xFlip, yFlip))
+                    (xFlip, yFlip) => tileMatches.Add(new TileMatch(index, tile, xFlip, yFlip))
                 );
 
                 matches[index] = tileMatches;
@@ -46,20 +48,18 @@ namespace ChunkMergeTool.Analysis
                         (xFlip, yFlip) => tile1.Equals(tile2, xFlip, yFlip),
                         (xFlip, yFlip) =>
                         {
-                            tile1matches.Add(new TileMatch(tile2, xFlip, yFlip));
+                            tile1matches.Add(new TileMatch(index2, tile2, xFlip, yFlip));
                             if (tile2.Pinned != PinnedKind.None) return;
-                            tile2matches.Add(new TileMatch(tile1, xFlip, yFlip));
+                            tile2matches.Add(new TileMatch(index1, tile1, xFlip, yFlip));
                         });
                 }
             }
 
-            return matches.ToDictionary(
-                entry => entry.Key,
-                entry => entry.Value.OrderBy(tile => tiles.IndexOf(tile.Data)).First());
+            return matches;
         }
 
         public static (List<TileData>, List<TileData>, List<TileData>) FindDuplicatesAcrossActs(
-            Dictionary<int, TileMatch> matches1, Dictionary<int, TileMatch> matches2)
+            Dictionary<int, List<TileMatch>> matches1, Dictionary<int, List<TileMatch>> matches2)
         {
             List<TileData> act1 = Utils.CreateShortlist<TileMatch, TileData>(matches1);
             List<TileData> act2 = Utils.CreateShortlist<TileMatch, TileData>(matches2);
@@ -74,7 +74,7 @@ namespace ChunkMergeTool.Analysis
                         (xFlip, yFlip) => tile1.Equals(tile2, xFlip, yFlip),
                         (xFlip, yFlip) =>
                         {
-                            foreach (TileMatch match in matches2.Values.Where(match => match.Data == tile2))
+                            foreach (TileMatch match in matches2.SelectMany(entry => entry.Value).Where(match => match.Data == tile2))
                             {
                                 match.Data = tile1;
                                 match.XFlip ^= xFlip;

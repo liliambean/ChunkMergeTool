@@ -2,15 +2,17 @@
 
 namespace ChunkMergeTool.Analysis
 {
-    internal class BlockMatch(BlockData block, bool xFlip, bool yFlip) : IMatch<BlockData>
+    internal class BlockMatch(int id, BlockData block, bool xFlip, bool yFlip) : IMatch<BlockData>
     {
+        public int Id { get; set; } = id;
+
         public BlockData Data { get; set; } = block;
 
         public bool XFlip { get; set; } = xFlip;
 
         public bool YFlip { get; set; } = yFlip;
 
-        public static Dictionary<int, BlockMatch> FindDuplicatesInAct(List<BlockData> blocks, Dictionary<int, IdMatch> tileIds)
+        public static Dictionary<int, List<BlockMatch>> FindDuplicatesInAct(List<BlockData> blocks, Dictionary<int, List<IdMatch>> tileIds)
         {
             Dictionary<int, List<BlockMatch>> matches = [];
 
@@ -23,7 +25,7 @@ namespace ChunkMergeTool.Analysis
 
                 Utils.ForEachFlipWhere(
                     (xFlip, yFlip) => block.Equals(block, xFlip, yFlip, tileIds, tileIds),
-                    (xFlip, yFlip) => blockMatches.Add(new BlockMatch(block, xFlip, yFlip))
+                    (xFlip, yFlip) => blockMatches.Add(new BlockMatch(index, block, xFlip, yFlip))
                 );
 
                 matches[index] = blockMatches;
@@ -46,20 +48,18 @@ namespace ChunkMergeTool.Analysis
                         (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tileIds, tileIds),
                         (xFlip, yFlip) =>
                         {
-                            block1matches.Add(new BlockMatch(block2, xFlip, yFlip));
-                            block2matches.Add(new BlockMatch(block1, xFlip, yFlip));
+                            block1matches.Add(new BlockMatch(index2, block2, xFlip, yFlip));
+                            block2matches.Add(new BlockMatch(index1, block1, xFlip, yFlip));
                         });
                 }
             }
 
-            return matches.ToDictionary(
-                entry => entry.Key,
-                entry => entry.Value.OrderBy(block => blocks.IndexOf(block.Data)).First());
+            return matches;
         }
 
         public static (List<BlockData>, List<BlockData>, List<BlockData>) FindDuplicatesAcrossActs(
-            Dictionary<int, BlockMatch> matches1, Dictionary<int, BlockMatch> matches2,
-            Dictionary<int, IdMatch> tileIds1, Dictionary<int, IdMatch> tileIds2)
+            Dictionary<int, List<BlockMatch>> matches1, Dictionary<int, List<BlockMatch>> matches2,
+            Dictionary<int, List<IdMatch>> tileIds1, Dictionary<int, List<IdMatch>> tileIds2)
         {
             List<BlockData> act1 = Utils.CreateShortlist<BlockMatch, BlockData>(matches1);
             List<BlockData> act2 = Utils.CreateShortlist<BlockMatch, BlockData>(matches2);
@@ -74,7 +74,7 @@ namespace ChunkMergeTool.Analysis
                         (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tileIds1, tileIds2),
                         (xFlip, yFlip) =>
                         {
-                            foreach (BlockMatch match in matches2.Values.Where(match => match.Data == block2))
+                            foreach (BlockMatch match in matches2.SelectMany(entry => entry.Value).Where(match => match.Data == block2))
                             {
                                 match.Data = block1;
                                 match.XFlip ^= xFlip;
