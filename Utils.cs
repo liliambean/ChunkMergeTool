@@ -63,6 +63,10 @@ namespace ChunkMergeTool
         public static readonly List<byte> UseAct1CollisionForChunkIDs = [0x41, 0x42];
         public static readonly List<byte> UseAct2CollisionForChunkIDs = [0x27, 0x4D, 0x4E, 0x4F, 0x64, 0x6E, 0xD1, 0xDF];
 
+        public static readonly List<int> UseAct1CollisionForBlockIDs = [0x001, 0x019, 0x01B, 0x01F, 0x020, 0x021, 0x022, 0x023, 0x025, 0x026,
+                                                                        0x059, 0x0DC, 0x0DD, 0x0ED, 0x0EE, 0x0EF, 0x0F0, 0x0F1, 0x0F2];
+        public static readonly List<int> UseAct2CollisionForBlockIDs = [0x0E3, 0x0E4];
+
         public static readonly Range PinnedTilesObjects = new(0, 0x48);
         public static readonly Range PinnedTilesPrimary = new(0x160, 0x178);
         public static readonly Range PinnedTilesAct1 = new(0x350, 0x36C);
@@ -126,6 +130,7 @@ namespace ChunkMergeTool
         }
 
         public static bool Equals(this BlockData block1, BlockData block2, bool xFlip, bool yFlip,
+            Dictionary<int, List<BlockMatch>> matches1, Dictionary<int, List<BlockMatch>> matches2,
             Dictionary<int, List<IdMatch>> tileIds1, Dictionary<int, List<IdMatch>> tileIds2)
         {
             IList<int> lookup;
@@ -167,12 +172,24 @@ namespace ChunkMergeTool
             if (block1.Collision != block2.Collision)
             {
                 // LBZ2 has a bunch of busted collision.
-                // return false;
+                if (tileIds1 == tileIds2)
+                    return false;
 
-                if (block2.Collision == 0x0000)
-                    block1.Collision = 0x0000;
-                else if (block1.Collision != 0x0000)
-                    block1.Collision = 0xFFFF;
+                int index1 = matches1.First(e => e.Value.Any(m => m.Data == block1)).Key;
+                if (UseAct1CollisionForBlockIDs.Contains((byte)index1))
+                {
+                    block2.Collision = block1.Collision;
+                    return true;
+                }
+
+                int index2 = matches2.First(e => e.Value.Any(m => m.Data == block2)).Key;
+                if (UseAct2CollisionForBlockIDs.Contains((byte)index2))
+                {
+                    block1.Collision = block2.Collision;
+                    return true;
+                }
+
+                return false;
             }
 
             return true;

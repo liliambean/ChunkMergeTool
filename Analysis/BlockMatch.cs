@@ -24,7 +24,7 @@ namespace ChunkMergeTool.Analysis
                 List<BlockMatch> blockMatches = [];
 
                 Utils.ForEachFlipWhere(
-                    (xFlip, yFlip) => block.Equals(block, xFlip, yFlip, tileIds, tileIds),
+                    (xFlip, yFlip) => block.Equals(block, xFlip, yFlip, matches, matches, tileIds, tileIds),
                     (xFlip, yFlip) => blockMatches.Add(new BlockMatch(index, block, xFlip, yFlip))
                 );
 
@@ -45,7 +45,7 @@ namespace ChunkMergeTool.Analysis
                     List<BlockMatch> block2matches = matches[index2];
 
                     Utils.ForEachFlipWhere(
-                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tileIds, tileIds),
+                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, matches, matches, tileIds, tileIds),
                         (xFlip, yFlip) =>
                         {
                             block1matches.Add(new BlockMatch(index2, block2, xFlip, yFlip));
@@ -71,7 +71,7 @@ namespace ChunkMergeTool.Analysis
 
                 foreach (BlockData block2 in act2)
                     Utils.ForEachFlipWhere(
-                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, tileIds1, tileIds2),
+                        (xFlip, yFlip) => block1.Equals(block2, xFlip, yFlip, matches1, matches2, tileIds1, tileIds2),
                         (xFlip, yFlip) =>
                         {
                             foreach (BlockMatch match in matches2.SelectMany(entry => entry.Value).Where(match => match.Data == block2))
