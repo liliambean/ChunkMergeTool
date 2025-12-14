@@ -63,8 +63,7 @@ namespace ChunkMergeTool
         public static readonly List<byte> UseAct1CollisionForChunkIDs = [0x41, 0x42];
         public static readonly List<byte> UseAct2CollisionForChunkIDs = [0x27, 0x4D, 0x4E, 0x4F, 0x64, 0x6E, 0xD1, 0xDF];
 
-        public static readonly List<int> UseAct1CollisionForBlockIDs = [0x001, 0x019, 0x01B, 0x01F, 0x020, 0x021, 0x022, 0x023, 0x025, 0x026,
-                                                                        0x059, 0x0DC, 0x0DD, 0x0ED, 0x0EE, 0x0EF, 0x0F0, 0x0F1, 0x0F2];
+        public static readonly List<int> UseAct1CollisionForBlockIDs = [0x0DC, 0x0DD, 0x0ED, 0x0EE, 0x0EF, 0x0F0, 0x0F1, 0x0F2];
         public static readonly List<int> UseAct2CollisionForBlockIDs = [0x0E3, 0x0E4];
 
         public static readonly Range PinnedTilesObjects = new(0, 0x48);
