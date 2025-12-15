@@ -56,20 +56,24 @@
             file.SetLength(0x600);
         }
 
-        public static void MarkUsedAndPinned(
-            List<ChunkData> chunks, List<BlockData> blocks, (int Origin, int Destination) Pin, string collisionFilename)
+        public static void MarkUsedAndPinned(string collisionFilename,
+            List<ChunkData> chunks, List<BlockData> blocks, (int Origin, int Destination, int Last, int[] Skip) Pin)
         {
             foreach (ChunkData chunk in chunks.Where(chunk => chunk.Used))
                 foreach (BlockRef block in chunk.Definition)
                     blocks[block.Id].Used = true;
 
-            int pinOffset = Pin.Destination - Pin.Origin;
-            if (pinOffset > 0)
+            if (Pin.Origin > 0)
             {
-                for (int id = Pin.Origin; id < blocks.Count; id++)
+                int pinnedId = Pin.Destination;
+
+                for (int id = Pin.Origin; id <= Pin.Last; id++)
                 {
+                    if (Pin.Skip.Contains(id))
+                        continue;
+
                     BlockData block = blocks[id];
-                    block.PinnedId = id + pinOffset;
+                    block.PinnedId = pinnedId++;
                 }
             }
 

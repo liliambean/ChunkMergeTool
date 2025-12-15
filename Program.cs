@@ -22,8 +22,8 @@ namespace ChunkMergeTool
             List<BlockData> blocksPrimary = BlockData.Load(Utils.FileBlocksPrimary);
             List<BlockData> blocksAct1 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct1)).ToList();
             List<BlockData> blocksAct2 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct2)).ToList();
-            BlockData.MarkUsedAndPinned(chunksAct1, blocksAct1, (0, 0), Utils.FileCollisionAct1);
-            BlockData.MarkUsedAndPinned(chunksAct2, blocksAct2, Utils.PinnedBlocksAct2, Utils.FileCollisionAct2);
+            BlockData.MarkUsedAndPinned(Utils.FileCollisionAct1, chunksAct1, blocksAct1, (0, 0, 0, []));
+            BlockData.MarkUsedAndPinned(Utils.FileCollisionAct2, chunksAct2, blocksAct2, Utils.PinnedBlocksAct2);
 
             List<TileData> tilesPrimary = TileData.Load(Utils.FileTilesPrimary);
             List<TileData> tilesAct1 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct1)).ToList();
@@ -92,7 +92,7 @@ namespace ChunkMergeTool
             ChunkData.MarkPinned(chunksDeathEgg, Utils.DeathEggChunkIDsFG);
 
             List<BlockData> blocksDeathEgg = BlockData.Load(Utils.FileBlocksDeathEgg);
-            BlockData.MarkUsedAndPinned(chunksDeathEgg, blocksDeathEgg, (0, 0), Utils.FileCollisionAct2);
+            BlockData.MarkUsedAndPinned(Utils.FileCollisionAct2, chunksDeathEgg, blocksDeathEgg, (0, 0, 0, []));
 
             List<TileData> tilesDeathEgg = TileData.Load(Utils.FileTilesDeathEgg);
             TileData.MarkUsedAndPinned(blocksDeathEgg, tilesDeathEgg, Utils.PinnedTilesNone, Utils.PinnedTilesNone, Utils.PinnedTilesNone);

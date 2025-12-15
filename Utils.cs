@@ -65,7 +65,8 @@ namespace ChunkMergeTool
 
         public static readonly List<int> UseAct1CollisionForBlockIDs = [0x0DC, 0x0DD, 0x0ED, 0x0EE, 0x0EF, 0x0F0, 0x0F1, 0x0F2];
         public static readonly List<int> UseAct2CollisionForBlockIDs = [0x0E3, 0x0E4];
-        public static readonly (int, int) PinnedBlocksAct2 = (0x1C1, 0x1E5);
+        public static readonly (int, int, int, int[])
+            PinnedBlocksAct2 = (0x1C1, 0x1E5, 0x26C, [0x1C5, 0x1C6, 0x1C7, 0x1C8, 0x1D5, 0x1D6, 0x1D7, 0x240]);
 
         public static readonly Range PinnedTilesObjects = new(0, 0x48);
         public static readonly Range PinnedTilesPrimary = new(0x160, 0x178);
