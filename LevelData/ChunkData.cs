@@ -1,6 +1,6 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class ChunkData(List<BlockRef> definition)
+    internal class ChunkData(List<BlockRef> definition) : IData
     {
         public List<BlockRef> Definition { get; set; } = definition;
 
@@ -64,29 +64,6 @@
                 ChunkData chunk = chunks[entry.Key];
                 chunk.Used = true;
                 chunk.PinnedId = entry.Value;
-            }
-        }
-
-        public static void EnsurePinned(List<ChunkData> chunks, int firstId)
-        {
-            if (firstId < 0)
-            {
-                int insertCount = chunks.Max(chunk => chunk.PinnedId) - chunks.Count + 1;
-                if (insertCount > 0)
-                    chunks.AddRange(Enumerable.Repeat(chunks[0], insertCount));
-
-                firstId = 0;
-            }
-
-            List<ChunkData> pinned = chunks.Where(chunk => chunk.PinnedId > 0).OrderBy(chunk => chunk.PinnedId).ToList();
-
-            foreach (ChunkData chunk in pinned)
-                chunks.Remove(chunk);
-
-            foreach (ChunkData chunk in pinned)
-            {
-                int index = chunk.PinnedId - firstId;
-                chunks.Insert(index, chunk);
             }
         }
     }

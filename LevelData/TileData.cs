@@ -1,6 +1,6 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class TileData(byte[] bytes)
+    internal class TileData(byte[] bytes) : IData
     {
         public byte[] Bytes { get; set; } = bytes;
 
@@ -63,20 +63,6 @@
                 TileData tile = tiles[id];
                 tile.Pinned = PinnedKind.Act;
                 tile.PinnedId = id;
-            }
-        }
-
-        public static void EnsurePinned(List<TileData> tiles, int firstId)
-        {
-            List<TileData> pinned = tiles.Where(tile => tile.Pinned != PinnedKind.None).ToList();
-
-            foreach (TileData tile in pinned)
-                tiles.Remove(tile);
-
-            foreach (TileData tile in pinned)
-            {
-                int index = tile.PinnedId - firstId;
-                tiles.Insert(index, tile);
             }
         }
     }

@@ -22,8 +22,8 @@ namespace ChunkMergeTool
             List<BlockData> blocksPrimary = BlockData.Load(Utils.FileBlocksPrimary);
             List<BlockData> blocksAct1 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct1)).ToList();
             List<BlockData> blocksAct2 = blocksPrimary.Concat(BlockData.Load(Utils.FileBlocksAct2)).ToList();
-            BlockData.MarkUsedAndLoadCollision(chunksAct1, blocksAct1, Utils.FileCollisionAct1);
-            BlockData.MarkUsedAndLoadCollision(chunksAct2, blocksAct2, Utils.FileCollisionAct2);
+            BlockData.MarkUsedAndPinned(chunksAct1, blocksAct1, (0, 0), Utils.FileCollisionAct1);
+            BlockData.MarkUsedAndPinned(chunksAct2, blocksAct2, Utils.PinnedBlocksAct2, Utils.FileCollisionAct2);
 
             List<TileData> tilesPrimary = TileData.Load(Utils.FileTilesPrimary);
             List<TileData> tilesAct1 = tilesPrimary.Concat(TileData.Load(Utils.FileTilesAct1)).ToList();
@@ -39,9 +39,9 @@ namespace ChunkMergeTool
             (List<TileData> Primary, List<TileData> Act1, List<TileData> Act2) Tiles
                 = TileMatch.FindDuplicatesAcrossActs(tileMatchesAct1, tileMatchesAct2);
 
-            TileData.EnsurePinned(Tiles.Primary, 0);
-            TileData.EnsurePinned(Tiles.Act1, Tiles.Primary.Count);
-            TileData.EnsurePinned(Tiles.Act2, Tiles.Primary.Count);
+            Utils.EnsurePinned(Tiles.Primary[0], Tiles.Primary, 0, padding: false);
+            Utils.EnsurePinned(Tiles.Primary[0], Tiles.Act1, Tiles.Primary.Count, padding: false);
+            Utils.EnsurePinned(Tiles.Primary[0], Tiles.Act2, Tiles.Primary.Count, padding: false);
 
             Dictionary<int, List<IdMatch>> tileIdsAct1 = Utils.GenerateIds(Tiles.Primary.Concat(Tiles.Act1).ToList(), tileMatchesAct1);
             Dictionary<int, List<IdMatch>> tileIdsAct2 = Utils.GenerateIds(Tiles.Primary.Concat(Tiles.Act2).ToList(), tileMatchesAct2);
@@ -53,6 +53,8 @@ namespace ChunkMergeTool
 
             (List<BlockData> Primary, List<BlockData> Act1, List<BlockData> Act2) Blocks
                 = BlockMatch.FindDuplicatesAcrossActs(blockMatchesAct1, blockMatchesAct2, tileIdsAct1, tileIdsAct2);
+
+            Utils.EnsurePinned(Blocks.Primary[0], Blocks.Act2, Blocks.Primary.Count, padding: true);
 
             Utils.UpdateTileRefs(Blocks.Primary, tileIdsAct1);
             Utils.UpdateTileRefs(Blocks.Act1, tileIdsAct1);
@@ -72,7 +74,7 @@ namespace ChunkMergeTool
             (List<ChunkData> Primary, List<ChunkData> Act1, List<ChunkData> Act2) Chunks
                 = ChunkMatch.FindDuplicatesAcrossActs(chunkMatchesAct1, chunkMatchesAct2, blockIdsAct1, blockIdsAct2);
 
-            ChunkData.EnsurePinned(Chunks.Act2, Chunks.Primary.Count);
+            Utils.EnsurePinned(Chunks.Primary[0], Chunks.Act2, Chunks.Primary.Count, padding: false);
 
             Utils.UpdateBlockRefs(Chunks.Primary, blockIdsAct1);
             Utils.UpdateBlockRefs(Chunks.Act1, blockIdsAct1);
@@ -90,7 +92,7 @@ namespace ChunkMergeTool
             ChunkData.MarkPinned(chunksDeathEgg, Utils.DeathEggChunkIDsFG);
 
             List<BlockData> blocksDeathEgg = BlockData.Load(Utils.FileBlocksDeathEgg);
-            BlockData.MarkUsedAndLoadCollision(chunksDeathEgg, blocksDeathEgg, Utils.FileCollisionAct1);
+            BlockData.MarkUsedAndPinned(chunksDeathEgg, blocksDeathEgg, (0, 0), Utils.FileCollisionAct2);
 
             List<TileData> tilesDeathEgg = TileData.Load(Utils.FileTilesDeathEgg);
             TileData.MarkUsedAndPinned(blocksDeathEgg, tilesDeathEgg, Utils.PinnedTilesNone, Utils.PinnedTilesNone, Utils.PinnedTilesNone);
@@ -99,7 +101,7 @@ namespace ChunkMergeTool
 
             Dictionary<int, List<TileMatch>> tileMatchesDeathEgg = TileMatch.FindDuplicatesInAct(tilesDeathEgg);
             tilesDeathEgg = Utils.CreateShortlist<TileMatch, TileData>(tileMatchesDeathEgg);
-            TileData.EnsurePinned(tilesDeathEgg, 0);
+            Utils.EnsurePinned(tilesDeathEgg[0], tilesDeathEgg, 0, padding: false);
             Dictionary<int, List<IdMatch>> tileIdsDeathEgg = Utils.GenerateIds(tilesDeathEgg, tileMatchesDeathEgg);
 
             Dictionary<int, List<BlockMatch>> blockMatchesDeathEgg = BlockMatch.FindDuplicatesInAct(blocksDeathEgg, tileIdsDeathEgg);
@@ -109,7 +111,7 @@ namespace ChunkMergeTool
 
             Dictionary<int, List<ChunkMatch>> chunkMatchesDeathEgg = ChunkMatch.FindDuplicatesInAct(chunksDeathEgg, blockIdsDeathEgg);
             chunksDeathEgg = Utils.CreateShortlist<ChunkMatch, ChunkData>(chunkMatchesDeathEgg);
-            ChunkData.EnsurePinned(chunksDeathEgg, -1);
+            Utils.EnsurePinned(chunksDeathEgg[0], chunksDeathEgg, 0, padding: true);
             Utils.UpdateBlockRefs(chunksDeathEgg, blockIdsDeathEgg);
 
 

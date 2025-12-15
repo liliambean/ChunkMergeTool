@@ -1,10 +1,12 @@
 ﻿namespace ChunkMergeTool.LevelData
 {
-    internal class BlockData(List<TileRef> definition)
+    internal class BlockData(List<TileRef> definition) : IData
     {
         public List<TileRef> Definition { get; set; } = definition;
 
         public bool Used { get; set; }
+
+        public int PinnedId { get; set; }
 
         public int Collision { get; set; }
 
@@ -54,13 +56,24 @@
             file.SetLength(0x600);
         }
 
-        public static void MarkUsedAndLoadCollision(List<ChunkData> chunks, List<BlockData> blocks, string filename)
+        public static void MarkUsedAndPinned(
+            List<ChunkData> chunks, List<BlockData> blocks, (int Origin, int Destination) Pin, string collisionFilename)
         {
             foreach (ChunkData chunk in chunks.Where(chunk => chunk.Used))
                 foreach (BlockRef block in chunk.Definition)
                     blocks[block.Id].Used = true;
 
-            using FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, filename));
+            int pinOffset = Pin.Destination - Pin.Origin;
+            if (pinOffset > 0)
+            {
+                for (int id = Pin.Origin; id < blocks.Count; id++)
+                {
+                    BlockData block = blocks[id];
+                    block.PinnedId = id + pinOffset;
+                }
+            }
+
+            using FileStream file = File.OpenRead(Path.Combine(Utils.WorkingDir, collisionFilename));
 
             foreach (BlockData block in blocks)
                 block.Collision = Utils.ReadWord(file);

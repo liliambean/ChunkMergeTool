@@ -65,6 +65,7 @@ namespace ChunkMergeTool
 
         public static readonly List<int> UseAct1CollisionForBlockIDs = [0x0DC, 0x0DD, 0x0ED, 0x0EE, 0x0EF, 0x0F0, 0x0F1, 0x0F2];
         public static readonly List<int> UseAct2CollisionForBlockIDs = [0x0E3, 0x0E4];
+        public static readonly (int, int) PinnedBlocksAct2 = (0x1C1, 0x1E5);
 
         public static readonly Range PinnedTilesObjects = new(0, 0x48);
         public static readonly Range PinnedTilesPrimary = new(0x160, 0x178);
@@ -335,6 +336,27 @@ namespace ChunkMergeTool
                     match.XFlip,
                     match.YFlip)
                 ).ToList());
+        }
+
+        public static void EnsurePinned<TData>(TData empty, List<TData> list, int firstId, bool padding) where TData : IData
+        {
+            if (padding)
+            {
+                int insertCount = list.Max(data => data.PinnedId) - firstId - list.Count + 1;
+                if (insertCount > 0)
+                    list.AddRange(Enumerable.Repeat(empty, insertCount));
+            }
+
+            List<TData> pinned = list.Where(data => data.PinnedId > 0).OrderBy(data => data.PinnedId).ToList();
+
+            foreach (TData data in pinned)
+                list.Remove(data);
+
+            foreach (TData data in pinned)
+            {
+                int index = data.PinnedId - firstId;
+                list.Insert(index, data);
+            }
         }
 
         public static int ReadWord(FileStream file)
