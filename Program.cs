@@ -96,6 +96,9 @@ namespace ChunkMergeTool
 
             List<TileData> tilesDeathEgg = TileData.Load(Utils.FileTilesDeathEgg);
             TileData.MarkUsedAndPinned(blocksDeathEgg, tilesDeathEgg, Utils.PinnedTilesNone, Utils.PinnedTilesNone, Utils.PinnedTilesNone);
+            tilesDeathEgg[0x11].PinnedId = 0x18B;
+            tilesDeathEgg[0x51].PinnedId = 0x18C;
+            tilesDeathEgg[0x51].Used = true;
 
 
 
